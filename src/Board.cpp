@@ -37,5 +37,27 @@ void Board::PutPiece(Piece * piece, std::string move) {
   PutPiece(piece, GetFile(move), GetRank(move));
 }
 
+void Board::RemovePiece(Piece * piece) {
+  assert(piece != nullptr);
+  assert(piece->board_ == this);
+
+  Piece ** square_containing_piece = FindPiece(piece);
+  *square_containing_piece = nullptr;
+  // TODO: maybe we need to put the piece in another set of removed pieces
+}
+
+Piece** Board::FindPiece(Piece * const piece) {
+  assert(piece != nullptr);
+
+  for(auto & files : board_) {
+    for(auto & cell : files) {
+      if(piece == cell) {
+        return & cell;
+      }
+    }
+  }
+  return nullptr;
+}
+
 }
 }

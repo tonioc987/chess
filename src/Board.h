@@ -20,12 +20,14 @@ public:
   Board(uint8_t num_files, uint8_t num_ranks);
   void PutPiece(Piece * piece, uint8_t file, uint8_t rank);
   void PutPiece(Piece * piece, std::string move);
+  void RemovePiece(Piece * piece);
 
 protected:
   uint8_t num_files_;
   uint8_t num_ranks_;
   std::vector<Piece *> pieces_;
   std::vector<std::vector<Piece*> > board_;
+  Piece ** FindPiece(Piece * piece);
 };
 
 }
