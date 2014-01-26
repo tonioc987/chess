@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 #include "PawnTest.cpp"
 #include "KingTest.cpp"
+#include "BishopTest.cpp"
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
