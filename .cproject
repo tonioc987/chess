@@ -40,7 +40,7 @@
 									<listOptionValue builtIn="false" value="gtest"/>
 									<listOptionValue builtIn="false" value="gtest_main"/>
 								</option>
-								<option id="gnu.cpp.link.option.paths.2139749915" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+								<option id="gnu.cpp.link.option.paths.2139749915" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.528947467" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -74,13 +74,11 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.95305830.2065658391" name="PawnTest.cpp" rcbsApplicability="disable" resourcePath="test/PawnTest.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711.1096228107">
-						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711.1096228107" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711">
-							<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.999608151" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-						</tool>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.95305830.1477694226" name="BishopTest.cpp" rcbsApplicability="disable" resourcePath="test/BishopTest.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711.1873536736">
+						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711.1873536736" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711"/>
 					</fileInfo>
 					<sourceEntries>
-						<entry excluding="test/PawnTest.cpp|test/src/PawnTest.cpp|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="test/BishopTest.cpp|test/PawnTest.cpp|test/src/PawnTest.cpp|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
