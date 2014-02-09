@@ -1,4 +1,8 @@
-#include "Bishop.h"
+/*  Chess
+ *  Copyright (C) 2014  Mary Lopez
+ *  This program is under the terms of the GNU GPL v3
+ *  See LICENSE file in the root of this project
+ */#include "Bishop.h"
 
 namespace acortes {
 namespace chess {

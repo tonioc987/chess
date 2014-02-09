@@ -74,11 +74,10 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.95305830.584729616" name="KingTest.cpp" rcbsApplicability="disable" resourcePath="test/KingTest.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711.1857852149">
-						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711.1857852149" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711"/>
-					</fileInfo>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.95305830.1477694226" name="BishopTest.cpp" rcbsApplicability="disable" resourcePath="test/BishopTest.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711.1873536736">
-						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711.1873536736" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711"/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.95305830.1126064853" name="QueenTest.cpp" rcbsApplicability="disable" resourcePath="test/QueenTest.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711.828964363">
+						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711.828964363" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.25445711">
+							<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2021683036" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+						</tool>
 					</fileInfo>
 					<sourceEntries>
 						<entry excluding="test/BishopTest.cpp|test/KingTest.cpp|test/PawnTest.cpp|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
