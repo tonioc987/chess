@@ -59,5 +59,12 @@ bool King::Castle(bool short_castle) {
   return true;
 }
 
+bool King::HasCastle(bool short_castle) const {
+  int file_rook_start = (short_castle) ? board_->GetNumFiles() - 1 : 0 ;
+  Piece * rook = board_->GetPiece(file_rook_start, rank_);
+  return (num_moves_ == 0) && (rook != nullptr) && (rook->GetNumMoves() == 0);
+}
+
+
 }
 }

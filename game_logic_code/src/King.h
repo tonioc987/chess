@@ -17,6 +17,7 @@ public:
   King(Player * player);
   bool IsValidMove(int new_file, int new_rank) const;
   bool Castle(bool short_castle);
+  bool HasCastle(bool short_castle) const;
   std::string GetLongName() const;
   std::string GetShortName() const;
   ~King();

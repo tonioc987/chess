@@ -41,7 +41,27 @@ string Game::FEN() const {
   fen.append((is_white_turn_) ? " w" : " b");
 
   // TODO: castling availability
-  fen.append(" -");
+  fen.append(" ");
+  bool any_castle = false;
+  if(players_[0]->HasCastle(true)) {
+    fen.append("K");
+    any_castle = true;
+  }
+  if(players_[0]->HasCastle(false)) {
+    fen.append("Q");
+    any_castle = true;
+  }
+  if(players_[1]->HasCastle(true)) {
+    fen.append("k");
+    any_castle = true;
+  }
+  if(players_[1]->HasCastle(false)) {
+    fen.append("q");
+    any_castle = true;
+  }
+  if(!any_castle) {
+    fen.append("-");
+  }
 
   // TODO: en passant
   fen.append(" -");
@@ -50,7 +70,12 @@ string Game::FEN() const {
   fen.append(" 0");
 
   // fullmove number
-  fen.append(" ").append(std::to_string((movements_.size()+1)/2));
+  fen.append(" ");
+  if(movements_.size() == 0) {
+    fen.append("1");
+  } else {
+    fen.append(std::to_string((movements_.size()+1)/2));
+  }
 
   return fen;
 }

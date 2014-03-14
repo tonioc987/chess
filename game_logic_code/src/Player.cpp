@@ -70,6 +70,11 @@ Movement * Player::Move() {
   return nullptr;
 }
 
+bool Player::HasCastle(bool short_castle) const {
+  King * king = static_cast<King *>(FindPiece(King::LongName));
+  return king->HasCastle(short_castle);
+}
+
 Piece * Player::FindPiece(Movement * move) {
   Piece * target_piece = nullptr;
 
@@ -105,7 +110,7 @@ Piece * Player::FindPiece(Movement * move) {
   return target_piece;
 }
 
-Piece * Player::FindPiece(std::string long_name, int file, int rank) {
+Piece * Player::FindPiece(std::string long_name, int file, int rank) const {
   Piece * target_piece = nullptr;
 
   for(auto const & piece : pieces_) {

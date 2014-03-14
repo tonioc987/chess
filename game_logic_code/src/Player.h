@@ -21,7 +21,8 @@ class Player {
 public:
   Player(Color color);
   void InitialSetup(Board *board);
-  Color GetColor() { return color_; }
+  Color GetColor() const { return color_; }
+  bool HasCastle(bool short_castle) const;
   Movement * Move();
   virtual ~Player();
 
@@ -32,7 +33,7 @@ protected:
 private:
   virtual Movement * GetPartialMoveInformation() = 0;
   Piece * FindPiece(Movement * move);
-  Piece * FindPiece(std::string long_name, int file = -1, int rank = -1);
+  Piece * FindPiece(std::string long_name, int file = -1, int rank = -1) const;
 };
 
 }
