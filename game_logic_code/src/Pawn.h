@@ -14,11 +14,12 @@ namespace chess {
 
 class Pawn : public Piece {
 public:
-  Pawn(Board * board, Color color);
-  bool IsValidMove(uint8_t new_file, uint8_t new_rank) const;
-  std::string LongName() const;
-  std::string ShortName() const;
+  Pawn(Player * player);
+  bool IsValidMove(int new_file, int new_rank) const;
+  std::string GetLongName() const;
+  std::string GetShortName() const;
   ~Pawn();
+  static const std::string LongName;
 };
 
 }

@@ -17,17 +17,19 @@ class Piece;
 
 class Board {
 public:
-  Board(uint8_t num_files, uint8_t num_ranks);
-  void PutPiece(Piece * piece, uint8_t file, uint8_t rank);
-  void PutPiece(Piece * piece, std::string move);
-  void RemovePiece(Piece * piece);
+  Board(int num_files, int num_ranks);
+  void PutPiece(Piece * piece, int file, int rank);
+  Piece * RemovePiece(int file, int rank);
+  Piece * GetPiece(int file, int rank);
+  std::string FEN() const;
+  int GetNumFiles() { return num_files_; }
+  int GetNumRanks() { return num_ranks_; }
 
 protected:
-  uint8_t num_files_;
-  uint8_t num_ranks_;
+  int num_files_;
+  int num_ranks_;
   std::vector<Piece *> pieces_;
   std::vector<std::vector<Piece*> > board_;
-  Piece ** FindPiece(Piece * piece);
 };
 
 }

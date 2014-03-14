@@ -4,21 +4,21 @@
  *  See LICENSE file in the root of this project
  */
 
-#ifndef QUEEN_H_
-#define QUEEN_H_
+#ifndef ROOK_H_
+#define ROOK_H_
 
 #include "Piece.h"
 
 namespace acortes {
 namespace chess {
 
-class Queen : public Piece {
+class Rook : public Piece {
 public:
-  Queen(Player * player);
-  bool IsValidMove(int new_file, int new_rank) const;
+  Rook(Player * player);
+  virtual bool IsValidMove(int new_file, int new_rank) const;
   std::string GetLongName() const;
   std::string GetShortName() const;
-  ~Queen();
+  ~Rook();
   static const std::string LongName;
 };
 

@@ -4,31 +4,31 @@
  *  See LICENSE file in the root of this project
  */
 
-#include "Bishop.h"
+#include "Rook.h"
 #include <cassert>
 
 namespace acortes {
 namespace chess {
 
-const std::string Bishop::LongName = "Bishop";
+const std::string Rook::LongName = "Rook";
 
-Bishop::Bishop(Player * player) : Piece(player) {
-
-}
-
-Bishop::~Bishop(){
+Rook::Rook(Player * player) : Piece(player) {
 
 }
 
-std::string Bishop::GetLongName() const {
-  return Bishop::LongName;
+Rook::~Rook(){
+
 }
 
-std::string Bishop::GetShortName() const {
-  return "B";
+std::string Rook::GetLongName() const {
+  return Rook::LongName;
 }
 
-bool Bishop::IsValidMove(int new_file, int new_rank) const {
+std::string Rook::GetShortName() const {
+  return "R";
+}
+
+bool Rook::IsValidMove(int new_file, int new_rank) const {
   int file_movement = abs(file_ - new_file);
   int rank_movement = abs(rank_ - new_rank);
   assert(new_rank >= 0 && new_rank < 8);
@@ -40,8 +40,11 @@ bool Bishop::IsValidMove(int new_file, int new_rank) const {
   } else if(file_movement == 0 && rank_movement == 0) {
     // no movement
     return false;
-  } else if(file_movement == rank_movement) {
-    // diagonal movement
+  } else if(file_movement == 0 && rank_movement !=0) {
+    // forward/backward movement
+    return true;
+  } else if(file_movement != 0 && rank_movement ==0) {
+    // left/right movement
     return true;
   }
   return false;

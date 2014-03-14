@@ -14,11 +14,12 @@ namespace chess {
 
 class Bishop : public Piece {
 public:
-  Bishop(Board * board, Color color);
-  bool IsValidMove(uint8_t new_file, uint8_t new_rank) const;
-  std::string LongName() const;
-  std::string ShortName() const;
+  Bishop(Player * player);
+  bool IsValidMove(int new_file, int new_rank) const;
+  std::string GetLongName() const;
+  std::string GetShortName() const;
   ~Bishop();
+  static const std::string LongName;
 };
 
 }

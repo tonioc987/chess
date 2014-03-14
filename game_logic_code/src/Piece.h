@@ -12,28 +12,34 @@
 namespace acortes {
 namespace chess {
 
+class Player;
 class Board;
 
 class Piece {
 public:
-  Piece(Board * board, Color color);
+  Piece(Player * player);
   virtual ~Piece();
-  void Put(uint8_t file, uint8_t rank);
-  void Put(std::string move);
-  void Move(uint8_t file, uint8_t rank);
-  void Move(std::string move);
-  virtual bool IsValidMove(uint8_t new_file, uint8_t new_rank) const = 0;
-  bool IsValidMove(std::string move) const;
-  virtual std::string LongName() const = 0;
-  virtual std::string ShortName() const = 0;
+  void Put(Board * board, int file, int rank);
+  void Move(int file, int rank, bool is_capture);
+  Color GetColor() const;
+  std::string FEN() const;
+  virtual bool IsValidMove(int new_file, int new_rank) const = 0;
+  virtual std::string GetLongName() const = 0;
+  virtual std::string GetShortName() const = 0;
+  int GetFile() {return file_;}
+  int GetRank() {return rank_;}
+  int GetNumMoves() { return num_moves_; }
 
   friend class Board;
 protected:
-  uint8_t rank_;
-  uint8_t file_;
-  uint8_t num_moves_;
+  int file_;
+  int rank_;
+  int num_moves_;
+  Player * player_;
   Board * board_;
-  Color color_;
+
+private:
+  void Captured();
 };
 
 }

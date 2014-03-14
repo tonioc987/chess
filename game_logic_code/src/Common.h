@@ -8,7 +8,6 @@
 #define COMMON_H_
 
 #include <string>
-#include <cstdint>
 
 namespace acortes {
 namespace chess {
@@ -18,12 +17,12 @@ enum class Color{
   Dark
 };
 
-static inline uint8_t GetFile(std::string move) {
-  return static_cast<uint8_t>(move[0]-'a');
+static inline int GetFile(char file) {
+  return static_cast<int>(file -'a');
 }
 
-inline uint8_t GetRank(std::string move) {
-  return static_cast<uint8_t>(move[1]-'1');
+inline int GetRank(char rank) {
+  return static_cast<int>(rank-'1');
 }
 
 }  // namespace chess

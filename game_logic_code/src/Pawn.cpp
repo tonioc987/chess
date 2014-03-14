@@ -9,7 +9,9 @@
 namespace acortes {
 namespace chess {
 
-Pawn::Pawn(Board * board, Color color) : Piece(board, color) {
+const std::string Pawn::LongName = "Pawn";
+
+Pawn::Pawn(Player * player) : Piece(player) {
 
 }
 
@@ -17,29 +19,33 @@ Pawn::~Pawn() {
 
 }
 
-std::string Pawn::LongName() const {
-  return "Pawn";
+std::string Pawn::GetLongName() const {
+  return Pawn::LongName;
 }
 
-std::string Pawn::ShortName() const {
-  return "";
+std::string Pawn::GetShortName() const {
+  return "P";
 }
 
-bool Pawn::IsValidMove(const uint8_t new_file, const uint8_t new_rank) const {
+bool Pawn::IsValidMove(const int new_file, const int new_rank) const {
+  const int rank_initial = (GetColor() == Color::Light) ? 1 : 6 ;
+  const int rank_one_step = (GetColor() == Color::Light) ? rank_+1 : rank_-1 ;
+  const int rank_two_steps = (GetColor() == Color::Light) ? rank_+2 : rank_-2 ;
+
   // forward move within the same file
   // when they are in the starting position, they can move two squares
   // No pieces should be in front of the pawn
   if (new_file == file_ &&
       /*&& check no piece*/
-      ( (new_rank == rank_+1) ||
-        (rank_ == 1 && new_rank == rank_+2 /*&& check no piece*/))) {
+      ( (new_rank == rank_one_step) ||
+        (rank_ == rank_initial && new_rank == rank_two_steps /*&& check no piece*/))) {
     return true;
   }
 
   // side move to capture to the left
   if (file_ > 0 &&
       new_file == file_-1 &&
-      new_rank == rank_+1/*&&
+      new_rank == rank_one_step/*&&
       is there an enemy piece */) {
     return true;
   }
@@ -47,7 +53,7 @@ bool Pawn::IsValidMove(const uint8_t new_file, const uint8_t new_rank) const {
   // side move to capture to the right
   if (file_ < 8 /*replace by board size*/-1 &&
       new_file == file_+1 &&
-      new_rank == rank_+1) {
+      new_rank == rank_one_step) {
     return true;
   }
 

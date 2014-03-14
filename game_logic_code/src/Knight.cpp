@@ -3,32 +3,31 @@
  *  This program is under the terms of the GNU GPL v3
  *  See LICENSE file in the root of this project
  */
-
-#include "Bishop.h"
+#include "Knight.h"
 #include <cassert>
 
 namespace acortes {
 namespace chess {
 
-const std::string Bishop::LongName = "Bishop";
+const std::string Knight::LongName = "Knight";
 
-Bishop::Bishop(Player * player) : Piece(player) {
-
-}
-
-Bishop::~Bishop(){
+Knight::Knight(Player * player) : Piece(player) {
 
 }
 
-std::string Bishop::GetLongName() const {
-  return Bishop::LongName;
+Knight::~Knight() {
+
 }
 
-std::string Bishop::GetShortName() const {
-  return "B";
+std::string Knight::GetLongName() const {
+  return Knight::LongName;
 }
 
-bool Bishop::IsValidMove(int new_file, int new_rank) const {
+std::string Knight::GetShortName() const {
+  return "N";
+}
+
+bool Knight::IsValidMove(int new_file, int new_rank) const {
   int file_movement = abs(file_ - new_file);
   int rank_movement = abs(rank_ - new_rank);
   assert(new_rank >= 0 && new_rank < 8);
@@ -37,11 +36,11 @@ bool Bishop::IsValidMove(int new_file, int new_rank) const {
   if(file_ == -1 || rank_ == -1 ) {
     // piece not in the board
     return false;
-  } else if(file_movement == 0 && rank_movement == 0) {
-    // no movement
-    return false;
-  } else if(file_movement == rank_movement) {
-    // diagonal movement
+  } else if(file_movement == 1 && rank_movement == 2) {
+    // forward/backward movement
+    return true;
+  } else if(file_movement == 2 && rank_movement == 1) {
+    // left/right movement
     return true;
   }
   return false;
