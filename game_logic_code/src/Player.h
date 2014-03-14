@@ -22,7 +22,7 @@ public:
   Player(Color color);
   void InitialSetup(Board *board);
   Color GetColor() { return color_; }
-  bool Move();
+  Movement * Move();
   virtual ~Player();
 
 protected:

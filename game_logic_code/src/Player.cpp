@@ -52,7 +52,7 @@ void Player::InitialSetup(Board *board) {
   }
 }
 
-bool Player::Move() {
+Movement * Player::Move() {
   Movement *move = GetPartialMoveInformation();
 
   if(move != nullptr) {
@@ -64,10 +64,10 @@ bool Player::Move() {
       Piece * piece = FindPiece(move);
       piece->Move(move->dest_file, move->dest_rank, move->is_capture);
     }
-    return true;
+    return move;
   }
 
-  return false;
+  return nullptr;
 }
 
 Piece * Player::FindPiece(Movement * move) {

@@ -9,12 +9,14 @@
 #define GAME_H_
 
 #include "Common.h"
+#include <vector>
 
 namespace acortes {
 namespace chess {
 
 class Board;
 class Player;
+struct Movement;
 
 class Game {
 public:
@@ -26,7 +28,7 @@ public:
 private:
   Board *board_;
   Player *(players_[2]);
-
+  std::vector<Movement *> movements_;
   bool is_white_turn_;
 };
 

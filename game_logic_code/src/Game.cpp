@@ -9,6 +9,7 @@
 #include "Game.h"
 #include "Board.h"
 #include "Player.h"
+#include "Movement.h"
 
 using namespace std;
 
@@ -26,9 +27,10 @@ void Game::InitialSetup() {
 }
 
 bool Game::Move() {
-  bool result = players_[is_white_turn_ ? 0 : 1]->Move();
+  Movement * move = players_[is_white_turn_ ? 0 : 1]->Move();
+  movements_.push_back(move);
   is_white_turn_ = !is_white_turn_;
-  return result;
+  return move!=nullptr;
 }
 
 string Game::FEN() const {
@@ -48,7 +50,7 @@ string Game::FEN() const {
   fen.append(" 0");
 
   // fullmove number
-  fen.append(" 0");
+  fen.append(" ").append(std::to_string((movements_.size()+1)/2));
 
   return fen;
 }
