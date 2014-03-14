@@ -41,7 +41,7 @@ protected:
 
 TEST_F(Game001, Game) {
   vector<string> fen = {
-      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
       "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR/",
       "rnbqkb1r/pppppppp/5n2/8/3P4/8/PPP1PPPP/RNBQKBNR/",
       "rnbqkb1r/pppppppp/5n2/8/3P4/4P3/PPP2PPP/RNBQKBNR/",

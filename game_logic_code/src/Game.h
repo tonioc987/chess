@@ -26,6 +26,7 @@ public:
 private:
   Board *board_;
   Player *(players_[2]);
+
   bool is_white_turn_;
 };
 

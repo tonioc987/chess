@@ -66,6 +66,7 @@ string Board::FEN() const {
     }
     fen.append("/");
   }
+  fen.erase(fen.size()-1);
   return fen;
 }
 

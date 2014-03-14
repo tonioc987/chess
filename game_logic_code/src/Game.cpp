@@ -32,7 +32,25 @@ bool Game::Move() {
 }
 
 string Game::FEN() const {
-  return board_->FEN();
+  // board position
+  string fen = board_->FEN();
+
+  // turn to move
+  fen.append((is_white_turn_) ? " w" : " b");
+
+  // TODO: castling availability
+  fen.append(" -");
+
+  // TODO: en passant
+  fen.append(" -");
+
+  // halfmove clock
+  fen.append(" 0");
+
+  // fullmove number
+  fen.append(" 0");
+
+  return fen;
 }
 
 }
