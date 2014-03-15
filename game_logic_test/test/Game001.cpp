@@ -42,19 +42,25 @@ protected:
 TEST_F(Game001, Game) {
   vector<string> fen = {
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR/",
-      "rnbqkb1r/pppppppp/5n2/8/3P4/8/PPP1PPPP/RNBQKBNR/",
-      "rnbqkb1r/pppppppp/5n2/8/3P4/4P3/PPP2PPP/RNBQKBNR/",
-      "rnbqkb1r/pppp1ppp/4pn2/8/3P4/4P3/PPP2PPP/RNBQKBNR/",
-      "rnbqkb1r/pppp1ppp/4pn2/8/3P4/3BP3/PPP2PPP/RNBQK1NR/",
-      "rnbqkb1r/ppp2ppp/4pn2/3p4/3P4/3BP3/PPP2PPP/RNBQK1NR/",
-      "rnbqkb1r/ppp2ppp/4pn2/3p4/3P1P2/3BP3/PPP3PP/RNBQK1NR/",
-      "rnbqkb1r/1pp2ppp/p3pn2/3p4/3P1P2/3BP3/PPP3PP/RNBQK1NR/",
-      "rnbqkb1r/1pp2ppp/p3pn2/3p4/3P1P2/3BPN2/PPP3PP/RNBQK2R/",
-      "r1bqkb1r/1pp2ppp/p1n1pn2/3p4/3P1P2/3BPN2/PPP3PP/RNBQK2R/",
-      "r1bqkb1r/1pp2ppp/p1n1pn2/3p4/3P1P2/2PBPN2/PP4PP/RNBQK2R/",
-      "r1bqkb1r/2p2ppp/p1n1pn2/1p1p4/3P1P2/2PBPN2/PP4PP/RNBQK2R/",
-      "r1bqkb1r/2p2ppp/p1n1pn2/1p1p4/3P1P2/2PBPN2/PP4PP/RNBQ1RK1/",// b kq - 1 7
+      "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1",
+      "rnbqkb1r/pppppppp/5n2/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 1 2",
+      "rnbqkb1r/pppppppp/5n2/8/3P4/4P3/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+      "rnbqkb1r/pppp1ppp/4pn2/8/3P4/4P3/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+      "rnbqkb1r/pppp1ppp/4pn2/8/3P4/3BP3/PPP2PPP/RNBQK1NR b KQkq - 1 3",
+      "rnbqkb1r/ppp2ppp/4pn2/3p4/3P4/3BP3/PPP2PPP/RNBQK1NR w KQkq d6 0 4",
+      "rnbqkb1r/ppp2ppp/4pn2/3p4/3P1P2/3BP3/PPP3PP/RNBQK1NR b KQkq f3 0 4",
+      "rnbqkb1r/1pp2ppp/p3pn2/3p4/3P1P2/3BP3/PPP3PP/RNBQK1NR w KQkq - 0 5",
+      "rnbqkb1r/1pp2ppp/p3pn2/3p4/3P1P2/3BPN2/PPP3PP/RNBQK2R b KQkq - 1 5",
+      "r1bqkb1r/1pp2ppp/p1n1pn2/3p4/3P1P2/3BPN2/PPP3PP/RNBQK2R w KQkq - 2 6",
+      "r1bqkb1r/1pp2ppp/p1n1pn2/3p4/3P1P2/2PBPN2/PP4PP/RNBQK2R b KQkq - 0 6",
+      "r1bqkb1r/2p2ppp/p1n1pn2/1p1p4/3P1P2/2PBPN2/PP4PP/RNBQK2R w KQkq b6 0 7",
+      "r1bqkb1r/2p2ppp/p1n1pn2/1p1p4/3P1P2/2PBPN2/PP4PP/RNBQ1RK1 b kq - 1 7",
+      "r2qkb1r/1bp2ppp/p1n1pn2/1p1p4/3P1P2/2PBPN2/PP4PP/RNBQ1RK1 w kq - 2 8",
+      "r2qkb1r/1bp2ppp/p1n1pn2/1p1p4/3P1P2/2PBPN2/PP1N2PP/R1BQ1RK1 b kq - 3 8",
+      "r2qkb1r/1bp1nppp/p3pn2/1p1p4/3P1P2/2PBPN2/PP1N2PP/R1BQ1RK1 w kq - 4 9",
+      "r2qkb1r/1bp1nppp/p3pn2/1p1pN3/3P1P2/2PBP3/PP1N2PP/R1BQ1RK1 b kq - 5 9",
+      "r2qkb1r/1bp1nppp/p3p3/1p1pN3/3PnP2/2PBP3/PP1N2PP/R1BQ1RK1 w kq - 6 10",
+      "r2qkb1r/1bp1nppp/p3p3/1p1pN3/3PnP2/2PBPN2/PP4PP/R1BQ1RK1 b kq - 7 10"
   };
 
   ASSERT_EQ(fen[0], game_->FEN());

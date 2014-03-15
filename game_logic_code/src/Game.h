@@ -30,6 +30,7 @@ private:
   Player *(players_[2]);
   std::vector<Movement *> movements_;
   bool is_white_turn_;
+  int halfmove_clock_;
 };
 
 }

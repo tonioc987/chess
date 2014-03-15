@@ -11,6 +11,7 @@
 #include "Player.h"
 #include "Movement.h"
 #include "Piece.h"
+#include "Pawn.h"
 
 using namespace std;
 
@@ -19,7 +20,8 @@ namespace chess {
 
 Game::Game(Board * board, Player * player1, Player * player2) :
   board_(board), players_{player1, player2},
-  is_white_turn_(true) {
+  is_white_turn_(true),
+  halfmove_clock_(0) {
 }
 
 void Game::InitialSetup() {
@@ -31,6 +33,11 @@ bool Game::Move() {
   Movement * move = players_[is_white_turn_ ? 0 : 1]->Move();
   movements_.push_back(move);
   is_white_turn_ = !is_white_turn_;
+  if(move->is_capture || (move->piece_type == &typeid(acortes::chess::Pawn))) {
+    halfmove_clock_ = 0;
+  } else {
+    halfmove_clock_++;
+  }
   return move!=nullptr;
 }
 
@@ -64,7 +71,7 @@ string Game::FEN() const {
     fen.append("-");
   }
 
-  // TODO: en passant
+  // en passant
   // is_white_turn_ indicates the player to move, a possible en passant pawn
   // belongs to the opposite player, that's the reason why the ternary operator
   // below looks backwards, but it is correct.
@@ -85,15 +92,12 @@ string Game::FEN() const {
   }
 
   // halfmove clock
-  fen.append(" 0");
+  fen.append(" ");
+  fen.append(std::to_string(halfmove_clock_));
 
   // fullmove number
   fen.append(" ");
-  if(movements_.size() == 0) {
-    fen.append("1");
-  } else {
-    fen.append(std::to_string((movements_.size()+1)/2));
-  }
+  fen.append(std::to_string(movements_.size()/2 + 1));
 
   return fen;
 }
