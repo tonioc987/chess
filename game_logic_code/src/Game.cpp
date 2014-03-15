@@ -10,6 +10,7 @@
 #include "Board.h"
 #include "Player.h"
 #include "Movement.h"
+#include "Piece.h"
 
 using namespace std;
 
@@ -64,7 +65,24 @@ string Game::FEN() const {
   }
 
   // TODO: en passant
-  fen.append(" -");
+  // is_white_turn_ indicates the player to move, a possible en passant pawn
+  // belongs to the opposite player, that's the reason why the ternary operator
+  // below looks backwards, but it is correct.
+  Piece * en_passant_candidate = players_[is_white_turn_ ? 1 : 0]->GetEnPassantCandidate();
+  fen.append(" ");
+  if(en_passant_candidate != nullptr) {
+    fen.append(1, GetFile(en_passant_candidate->GetFile()));
+    int rank = en_passant_candidate->GetRank();
+    // FEN records the position behind the pawn
+    if(is_white_turn_) { // black is en passant candidate
+      rank++;
+    } else {  // white is en passant candidate
+      rank--;
+    }
+    fen.append(1, GetRank(rank));
+  } else {
+    fen.append("-");
+  }
 
   // halfmove clock
   fen.append(" 0");

@@ -17,12 +17,20 @@ enum class Color{
   Dark
 };
 
-static inline int GetFile(char file) {
+inline int GetFile(char file) {
   return static_cast<int>(file -'a');
 }
 
 inline int GetRank(char rank) {
   return static_cast<int>(rank-'1');
+}
+
+inline char GetFile(int file) {
+  return static_cast<char>(file + 'a');
+}
+
+inline char GetRank(int rank) {
+  return static_cast<char>(rank + '1');
 }
 
 }  // namespace chess

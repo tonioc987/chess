@@ -21,6 +21,7 @@ namespace chess {
 
 Player::Player(Color color) {
   color_ = color;
+  en_passant_candidate_ = nullptr;
   // create pieces in order from a to h first row
   // and then all the pawns from a to h
   pieces_.push_back(new Rook(this));
@@ -63,6 +64,14 @@ Movement * Player::Move() {
     } else {
       Piece * piece = FindPiece(move);
       piece->Move(move->dest_file, move->dest_rank, move->is_capture);
+
+      // store en passant candidate
+      if((piece->GetLongName() == Pawn::LongName) &&
+         (abs(move->source_rank - move->dest_rank) == 2)) {
+        en_passant_candidate_ = piece;
+      } else {
+        en_passant_candidate_ = nullptr;
+      }
     }
     return move;
   }
