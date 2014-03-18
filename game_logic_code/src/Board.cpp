@@ -15,7 +15,8 @@ namespace chess {
 // initialize board to contain num_files_*num_ranks_ pointers
 // to pieces
 Board::Board(int num_files, int num_ranks) :
-    num_files_(num_files), num_ranks_(num_ranks){
+    num_files_(num_files), num_ranks_(num_ranks),
+    en_passant_candidate_(nullptr) {
   board_.resize(num_ranks_);
   for(auto & files : board_) {
     files.resize(num_files_);

@@ -5,6 +5,8 @@
  *  See LICENSE file in the root of this project
  */
 #include "Pawn.h"
+#include "Board.h"
+#include <cassert>
 
 namespace acortes {
 namespace chess {
@@ -59,6 +61,35 @@ bool Pawn::IsValidMove(const int new_file, const int new_rank) const {
 
   // TODO en passant capture
   return false;
+}
+
+void Pawn::Move(int file, int rank, bool is_capture) {
+  // handle en passant, if not delegate to base class
+  if(is_capture) {
+    Piece * en_passant_piece = board_->GetEnPassantCandidate();
+    if(en_passant_piece != nullptr) {
+      int en_passant_file = en_passant_piece->GetFile();
+      int en_passant_rank = en_passant_piece->GetRank();
+      // if this is a white piece, the en passant target is a black piece
+      // so the piece is actually located one rank less (i.e. black piece in
+      // f5, target en passant f6)
+      if (GetColor() == Color::Light) {
+        // black en passant
+        en_passant_rank++;
+      } else {
+        // whithe en passant
+        en_passant_rank--;
+      }
+
+      if(file == en_passant_file && rank == en_passant_rank) {
+        // put the en passant target in the target square and
+        // delegate the rest of the processing to the base class
+        board_->RemovePiece(en_passant_piece->GetFile(), en_passant_piece->GetRank());
+        en_passant_piece->Put(board_, file, rank);
+      }
+    }
+  }
+  Piece::Move(file, rank, is_capture);
 }
 
 }

@@ -22,7 +22,6 @@ public:
   Player(Color color);
   void InitialSetup(Board *board);
   Color GetColor() const { return color_; }
-  Piece * GetEnPassantCandidate() const { return en_passant_candidate_; }
   bool HasCastle(bool short_castle) const;
   Movement * Move();
   virtual ~Player();
@@ -30,7 +29,6 @@ public:
 protected:
   Color color_;
   std::vector<Piece *> pieces_;
-  Piece * en_passant_candidate_;
 
 private:
   virtual Movement * GetPartialMoveInformation() = 0;

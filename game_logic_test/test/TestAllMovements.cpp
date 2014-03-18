@@ -143,7 +143,7 @@ vector<pair<string,string>> Game001 = {
     make_pair("Rc5", "3r4/2p2k1p/p4p2/1pR5/1P6/P3R1P1/5PKP/3r4 b - - 6 35"),
     make_pair("R8d7", "8/2pr1k1p/p4p2/1pR5/1P6/P3R1P1/5PKP/3r4 w - - 7 36"),
     make_pair("Rec3", "8/2pr1k1p/p4p2/1pR5/1P6/P1R3P1/5PKP/3r4 b - - 8 36"),
-    make_pair("Kg6", "8/2pr1k1p/p4p2/1pR5/1P6/P1R3P1/5PKP/3r4 b - - 8 36"),
+    make_pair("Kg6", "8/2pr3p/p4pk1/1pR5/1P6/P1R3P1/5PKP/3r4 w - - 9 37"),
     make_pair("Rxc7", "8/2Rr3p/p4pk1/1p6/1P6/P1R3P1/5PKP/3r4 b - - 0 37"),
     make_pair("Rxc7", "8/2r4p/p4pk1/1p6/1P6/P1R3P1/5PKP/3r4 w - - 0 38"),
     make_pair("Rxc7", "8/2R4p/p4pk1/1p6/1P6/P5P1/5PKP/3r4 b - - 0 38"),

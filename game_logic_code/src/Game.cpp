@@ -38,6 +38,15 @@ bool Game::Move() {
   } else {
     halfmove_clock_++;
   }
+
+  // store en passant candidate
+  if((move->piece->GetLongName() == Pawn::LongName) &&
+     (abs(move->source_rank - move->dest_rank) == 2)) {
+    board_->SetEnPassantCandidate(move->piece);
+  } else {
+    board_->SetEnPassantCandidate(nullptr);
+  }
+
   return move!=nullptr;
 }
 
@@ -72,10 +81,7 @@ string Game::FEN() const {
   }
 
   // en passant
-  // is_white_turn_ indicates the player to move, a possible en passant pawn
-  // belongs to the opposite player, that's the reason why the ternary operator
-  // below looks backwards, but it is correct.
-  Piece * en_passant_candidate = players_[is_white_turn_ ? 1 : 0]->GetEnPassantCandidate();
+  Piece * en_passant_candidate = board_->GetEnPassantCandidate();
   fen.append(" ");
   if(en_passant_candidate != nullptr) {
     fen.append(1, GetFile(en_passant_candidate->GetFile()));

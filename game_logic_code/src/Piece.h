@@ -20,7 +20,7 @@ public:
   Piece(Player * player);
   virtual ~Piece();
   void Put(Board * board, int file, int rank);
-  void Move(int file, int rank, bool is_capture);
+  virtual void Move(int file, int rank, bool is_capture);
   Color GetColor() const;
   std::string FEN() const;
   virtual bool IsValidMove(int new_file, int new_rank) const = 0;

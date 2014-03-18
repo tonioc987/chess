@@ -16,6 +16,7 @@ class Pawn : public Piece {
 public:
   Pawn(Player * player);
   bool IsValidMove(int new_file, int new_rank) const;
+  virtual void Move(int file, int rank, bool is_capture);
   std::string GetLongName() const;
   std::string GetShortName() const;
   ~Pawn();
