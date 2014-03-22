@@ -282,7 +282,7 @@ vector<pair<string,string>> Game003 = {
     make_pair("13.c3", "3r1rk1/1bq1bppp/p1nppn2/1pp5/4P2P/1PPP1NP1/PB1QNPB1/R4RK1 b - - 0 13"),
     make_pair("Rfe8", "3rr1k1/1bq1bppp/p1nppn2/1pp5/4P2P/1PPP1NP1/PB1QNPB1/R4RK1 w - - 1 14"),
     make_pair("14.d4", "3rr1k1/1bq1bppp/p1nppn2/1pp5/3PP2P/1PP2NP1/PB1QNPB1/R4RK1 b - - 0 14"),
-    make_pair("cxd4", "3rr1k1/1bq1bppp/p1nppn2/1p6/3pP2P/1PP2NP1/PB1QNPB1/R4RK1 w - - 0 "),
+    make_pair("cxd4", "3rr1k1/1bq1bppp/p1nppn2/1p6/3pP2P/1PP2NP1/PB1QNPB1/R4RK1 w - - 0 15"),
     make_pair("15.cxd4", "3rr1k1/1bq1bppp/p1nppn2/1p6/3PP2P/1P3NP1/PB1QNPB1/R4RK1 b - - 0 15"),
     make_pair("d5", "3rr1k1/1bq1bppp/p1n1pn2/1p1p4/3PP2P/1P3NP1/PB1QNPB1/R4RK1 w - - 0 16"),
     make_pair("16.e5", "3rr1k1/1bq1bppp/p1n1pn2/1p1pP3/3P3P/1P3NP1/PB1QNPB1/R4RK1 b - - 0 16"),
