@@ -16,21 +16,24 @@ namespace chess {
 class ChessEngineInterface {
 
 public:
-  ChessEngineInterface();
-  void ReadLines(std::queue<std::string> & lines);
-  void WriteLine(std::string msg);
+  ChessEngineInterface(bool initialize);
+  void Initialize();
 
 private:
   int parentToChild_[2];
   int childToParent_[2];
   pid_t pid_;
-  static const int BUFFER_SIZE = 100;
+  static const int BUFFER_SIZE = 1000;
   char buffer_[BUFFER_SIZE+1];
   fd_set readfds_;
   std::string temp_string;
+  std::queue<std::string> lines;
 
   size_t Read();
+  void ReadLines(std::queue<std::string> & lines);
+  std::string ReadLine();
   void Write(std::string msg);
+  void WriteLine(std::string msg);
 };
 
 }

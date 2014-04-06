@@ -11,18 +11,8 @@ using namespace acortes::chess;
 
 int main()
 {
-  ChessEngineInterface engine;
-  queue<string> lines;
-  sleep(1);
-
-  engine.WriteLine("uci");
-  while(true) {
-    engine.ReadLines(lines);
-    while(lines.size()) {
-      cout << ">>>" << lines.front() << endl;
-      lines.pop();
-    }
-  }
+  ChessEngineInterface engine(false);
+  engine.Initialize();
 
   /*Board *board = new Board(8,8);
   PGNReader pgn("/home/acp/Downloads/parayuri_vs_rdom_2014_03_23.pgn");

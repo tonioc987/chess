@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include <iostream>
 #include "ChessEngineInterface.h"
 
 using namespace std;
@@ -19,21 +20,29 @@ enum PIPE_FILE_DESC {
   WRITE_FD = 1
 };
 
-ChessEngineInterface::ChessEngineInterface() {
+ChessEngineInterface::ChessEngineInterface(bool initialize = false) {
+  if(initialize) {
+    Initialize();
+  }
+}
+
+void ChessEngineInterface::Initialize() {
   pipe(parentToChild_);
   pipe(childToParent_);
 
+  // launch stockfish in another thread
+  // setup pipes between parent and child
   switch(pid_ = fork()) {
     case -1:
       // fork failed;
       exit(-1);
 
     case 0: // child launches stockfish
+      close(parentToChild_[WRITE_FD]);
+      close(childToParent_[READ_FD]);
       dup2(parentToChild_[READ_FD], STDIN_FILENO);
       dup2(childToParent_[WRITE_FD], STDOUT_FILENO);
       dup2(childToParent_[WRITE_FD], STDERR_FILENO);
-      close(parentToChild_[WRITE_FD]);
-      close(childToParent_[READ_FD]);
 
       execlp("/usr/games/stockfish", "stockfish", NULL);
       exit(-1);
@@ -42,12 +51,35 @@ ChessEngineInterface::ChessEngineInterface() {
       //cout << "Child " << pid_ << "running" << endl;
       close(parentToChild_[READ_FD]);
       close(childToParent_[WRITE_FD]);
-
-      // setup for non-blocking reads from child
-      FD_ZERO(&readfds_);
-      FD_SET(childToParent_[READ_FD], &readfds_);
       break;
   }
+
+  // initial handshaking
+  string line;
+
+  do {
+    line = ReadLine();
+    if(!line.empty()) {
+      cout << line << endl;
+    }
+  } while(line.empty() || line.compare(0, 9, "Stockfish") != 0);
+
+  WriteLine("uci");
+  do {
+    line = ReadLine();
+    if(!line.empty()) {
+      cout << line << endl;
+    }
+  } while(line.empty() || line.compare(0, 5, "uciok") != 0);
+
+  WriteLine("setoption name Hash value 32");
+  WriteLine("isready");
+  do {
+    line = ReadLine();
+    if(!line.empty()) {
+      cout << line << endl;
+    }
+  } while(line.empty() || line.compare(0, 7, "readyok") != 0);
 }
 
 size_t ChessEngineInterface::Read() {
@@ -55,6 +87,10 @@ size_t ChessEngineInterface::Read() {
   timeout.tv_sec = 0;
   timeout.tv_usec = 1000; //1 msec
   size_t readResult = 0;
+
+  // setup for non-blocking reads from child
+  FD_ZERO(&readfds_);
+  FD_SET(childToParent_[READ_FD], &readfds_);
 
   switch(select(1+childToParent_[READ_FD], & readfds_, (fd_set*)NULL, (fd_set*)NULL, &timeout)) {
     case 0: // timeout
@@ -97,6 +133,21 @@ void ChessEngineInterface::ReadLines(queue<string> & lines) {
     }
     temp_string.append(start,current);
   }
+}
+
+std::string ChessEngineInterface::ReadLine() {
+  std::string line = "";
+
+  if(lines.empty()) {
+    ReadLines(lines);
+  }
+
+  if(!lines.empty()) {
+    line = lines.front();
+    lines.pop();
+  }
+
+  return line;
 }
 
 void ChessEngineInterface::Write(string msg) {
