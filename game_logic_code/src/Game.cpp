@@ -108,5 +108,9 @@ string Game::FEN() const {
   return fen;
 }
 
+string Game::GetLastMove() {
+  return movements_.back()->move;
+}
+
 }
 }

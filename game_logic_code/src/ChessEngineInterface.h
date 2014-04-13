@@ -9,6 +9,8 @@
 
 #include <queue>
 #include <string>
+#include <utility>
+#include "Game.h"
 
 namespace acortes {
 namespace chess {
@@ -16,8 +18,9 @@ namespace chess {
 class ChessEngineInterface {
 
 public:
-  ChessEngineInterface(bool initialize);
+  ChessEngineInterface(bool verbose = false);
   void Initialize();
+  void Analyze(Game game, bool analyze_white, bool analyze_black);
 
 private:
   int parentToChild_[2];
@@ -26,14 +29,18 @@ private:
   static const int BUFFER_SIZE = 1000;
   char buffer_[BUFFER_SIZE+1];
   fd_set readfds_;
-  std::string temp_string;
-  std::queue<std::string> lines;
+  std::string temp_string_;
+  std::vector<std::string> lines_;
+  size_t index_current_line_;
+  bool verbose_;
 
   size_t Read();
-  void ReadLines(std::queue<std::string> & lines);
-  std::string ReadLine();
+  void ReadLines(std::vector<std::string> & lines);
+  std::string GetNextLine();
+  void WaitForLine(std::string line_start);
   void Write(std::string msg);
   void WriteLine(std::string msg);
+  std::pair<long, std::string> Analyze(std::string fen);
 };
 
 }

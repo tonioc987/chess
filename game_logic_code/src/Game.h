@@ -24,6 +24,8 @@ public:
   void InitialSetup();
   bool Move();
   std::string FEN() const;
+  bool IsWhiteTurn() const { return is_white_turn_;}
+  std::string GetLastMove();
 
 private:
   Board *board_;
