@@ -38,7 +38,7 @@ Player::Player(Color color) {
 
 void Player::InitialSetup(Board *board) {
   int rank = (color_ == Color::Light) ? 0 : 7;
-  std::vector<Piece *>::iterator piece = pieces_.begin();
+  auto piece = pieces_.begin();
 
   for(int i = 0; i < 8; ++i) {
     (*piece)->Put(board, i, rank);
@@ -128,7 +128,10 @@ Piece * Player::FindPiece(std::string long_name, int file, int rank) const {
 }
 
 Player::~Player() {
-
+  for(auto & piece : pieces_) {
+    delete piece;
+    piece = nullptr;
+  }
 }
 
 }

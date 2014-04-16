@@ -19,6 +19,7 @@ struct Movement;
 class PGNReader {
 public:
   PGNReader(std::string filename);
+  ~PGNReader();
   Movement* GetMove(unsigned int n) const;
 
 private:

@@ -52,6 +52,8 @@ PGNReader::PGNReader(std::string filename) {
       }
     }
   }
+
+  pgn_file.close();
 }
 
 
@@ -185,6 +187,13 @@ Movement * PGNReader::GetMove(unsigned int n) const {
     return moves_[n];
   } else {
     return nullptr;
+  }
+}
+
+PGNReader::~PGNReader() {
+  for(auto & move : moves_) {
+    delete move;
+    move = nullptr;
   }
 }
 

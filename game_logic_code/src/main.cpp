@@ -21,6 +21,11 @@ int main()
   while(game.Move()) {
     cout << game.FEN() << endl;
   }
+
+  delete player1;
+  delete player2;
+  delete board;
+
   /*ChessEngineInterface engine(false);
   bool analize_white = false;
   bool analize_black = true;
