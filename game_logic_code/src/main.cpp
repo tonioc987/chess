@@ -18,10 +18,13 @@ int main()
   Game game(board, player1, player2);
   game.InitialSetup();
 
-  ChessEngineInterface engine(false);
+  while(game.Move()) {
+    cout << game.FEN() << endl;
+  }
+  /*ChessEngineInterface engine(false);
   bool analize_white = false;
   bool analize_black = true;
   engine.Analyze(game, analize_white, analize_black);
-
+   */
   return 0;
 }

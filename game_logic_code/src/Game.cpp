@@ -31,20 +31,23 @@ void Game::InitialSetup() {
 
 bool Game::Move() {
   Movement * move = players_[is_white_turn_ ? 0 : 1]->Move();
-  movements_.push_back(move);
-  is_white_turn_ = !is_white_turn_;
-  if(move->is_capture || (move->piece_type == &typeid(acortes::chess::Pawn))) {
-    halfmove_clock_ = 0;
-  } else {
-    halfmove_clock_++;
-  }
 
-  // store en passant candidate
-  if((move->piece->GetLongName() == Pawn::LongName) &&
-     (abs(move->source_rank - move->dest_rank) == 2)) {
-    board_->SetEnPassantCandidate(move->piece);
-  } else {
-    board_->SetEnPassantCandidate(nullptr);
+  if(move != nullptr) {
+    movements_.push_back(move);
+    is_white_turn_ = !is_white_turn_;
+    if(move->is_capture || (move->piece_type == &typeid(acortes::chess::Pawn))) {
+      halfmove_clock_ = 0;
+    } else {
+      halfmove_clock_++;
+    }
+
+    // store en passant candidate
+    if((move->piece->GetLongName() == Pawn::LongName) &&
+       (abs(move->source_rank - move->dest_rank) == 2)) {
+      board_->SetEnPassantCandidate(move->piece);
+    } else {
+      board_->SetEnPassantCandidate(nullptr);
+    }
   }
 
   return move!=nullptr;
