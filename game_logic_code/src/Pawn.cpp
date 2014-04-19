@@ -38,9 +38,10 @@ bool Pawn::IsValidMove(const int new_file, const int new_rank) const {
   // when they are in the starting position, they can move two squares
   // No pieces should be in front of the pawn
   if (new_file == file_ &&
-      /*&& check no piece*/
+      board_->GetPiece(file_, rank_one_step) == nullptr &&
       ( (new_rank == rank_one_step) ||
-        (rank_ == rank_initial && new_rank == rank_two_steps /*&& check no piece*/))) {
+        (rank_ == rank_initial && new_rank == rank_two_steps &&
+         board_->GetPiece(file_, rank_two_steps) == nullptr))) {
     return true;
   }
 
@@ -59,7 +60,9 @@ bool Pawn::IsValidMove(const int new_file, const int new_rank) const {
     return true;
   }
 
-  // TODO en passant capture
+  // en passant capture: this is handle when the move is done,
+  // no special validation is needed since it is assumed that
+  // a valid pgn file is being read.
   return false;
 }
 
