@@ -18,11 +18,13 @@ namespace chess {
 class ChessEngineInterface {
 
 public:
-  ChessEngineInterface(bool verbose = false);
+  ChessEngineInterface(std::string engine_path, bool verbose = false);
   void Initialize();
-  void Analyze(Game game, bool analyze_white, bool analyze_black);
+  void Analyze(Game game, bool analyze_white, bool analyze_black,
+      long time_per_move, long blunder_threshold);
 
 private:
+  std::string engine_path_;
   int parentToChild_[2];
   int childToParent_[2];
   pid_t pid_;
@@ -40,7 +42,7 @@ private:
   void WaitForLine(std::string line_start);
   void Write(std::string msg);
   void WriteLine(std::string msg);
-  std::pair<long, std::string> Analyze(std::string fen);
+  std::pair<long, std::string> Analyze(std::string fen, long time_secs);
 };
 
 }

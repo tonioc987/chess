@@ -20,8 +20,8 @@ enum PIPE_FILE_DESC {
   WRITE_FD = 1
 };
 
-ChessEngineInterface::ChessEngineInterface(bool verbose) {
-  verbose_ = verbose;
+ChessEngineInterface::ChessEngineInterface(string engine_path, bool verbose) :
+  engine_path_(engine_path), verbose_(verbose) {
   Initialize();
 }
 
@@ -31,6 +31,8 @@ void ChessEngineInterface::Initialize() {
 
   // launch stockfish in another thread
   // setup pipes between parent and child
+  size_t index = engine_path_.find_last_of('/');
+
   switch(pid_ = fork()) {
     case -1:
       // fork failed;
@@ -43,7 +45,7 @@ void ChessEngineInterface::Initialize() {
       dup2(childToParent_[WRITE_FD], STDOUT_FILENO);
       dup2(childToParent_[WRITE_FD], STDERR_FILENO);
 
-      execlp("/media/common/prgrmmng/stockfish/stockfish-dd-src/src/stockfish", "stockfish", NULL);
+      execlp(engine_path_.c_str(), engine_path_.substr(index+1).c_str(), NULL);
       exit(-1);
 
     default: //parent
@@ -155,7 +157,8 @@ void ChessEngineInterface::WriteLine(string msg) {
   Write(msg.append("\n"));
 }
 
-void ChessEngineInterface::Analyze(Game game, bool analyze_white, bool analyze_black) {
+void ChessEngineInterface::Analyze(Game game, bool analyze_white, bool analyze_black,
+    long time_per_move, long blunder_threshold) {
   do {
     string pre_FEN = game.FEN();
     // game.Move() changes the state of IsWhiteTurn,
@@ -165,33 +168,32 @@ void ChessEngineInterface::Analyze(Game game, bool analyze_white, bool analyze_b
     bool is_white_turn = game.IsWhiteTurn();
 
     if(game.Move()) {
-      cout << game.GetLastMove() << endl;
-      cout << game.FEN() << endl;
+      cout << game.GetLastMove() << ",";
+      cout << game.FEN() << ",";
+      cout.flush();
       if((is_white_turn && analyze_white) ||
          (!is_white_turn && analyze_black)) {
-        auto engine_option = Analyze(pre_FEN);
-        auto player_option = Analyze(game.FEN());
+        auto engine_option = Analyze(pre_FEN, time_per_move);
+        auto player_option = Analyze(game.FEN(), time_per_move);
         auto diff = engine_option.first - player_option.first;
 
-        if((is_white_turn && diff > 100) ||
-           (!is_white_turn && diff < -100)) {
-          cout << "================ Engine =================================" << endl;
-          cout << engine_option.first << ": " << engine_option.second << endl;
-
-          cout << "================= Player ================================" << endl;
-          cout << player_option.first << ": " << player_option.second << endl;
+        if((is_white_turn && diff > blunder_threshold) ||
+           (!is_white_turn && diff < -blunder_threshold)) {
+          cout << player_option.first << "," << player_option.second << ",";
+          cout << engine_option.first << "," << engine_option.second << ",";
         }
       }
+      cout << endl;
     } else {
       break;
     }
   } while(true);
 }
 
-pair<long, string> ChessEngineInterface::Analyze(string fen) {
+pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
   WriteLine("ucinewgame");
   WriteLine("position fen " + fen);
-  WriteLine("go movetime 10000");
+  WriteLine("go movetime " + to_string(time_secs*1000));
   WaitForLine("bestmove");
 
   // get best line
