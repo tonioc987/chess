@@ -22,6 +22,7 @@ public:
   void Initialize();
   void Analyze(Game game, bool analyze_white, bool analyze_black,
       long time_per_move, long blunder_threshold);
+  ~ChessEngineInterface();
 
 private:
   std::string engine_path_;

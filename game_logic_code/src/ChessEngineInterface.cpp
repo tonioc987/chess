@@ -67,6 +67,12 @@ void ChessEngineInterface::Initialize() {
   WaitForLine("readyok");
 }
 
+ChessEngineInterface::~ChessEngineInterface() {
+  int return_status;
+  WriteLine("quit");
+  waitpid(pid_, &return_status, 0);
+}
+
 size_t ChessEngineInterface::Read() {
   struct timeval timeout;
   timeout.tv_sec = 0;
