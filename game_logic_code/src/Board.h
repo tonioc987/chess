@@ -26,6 +26,7 @@ public:
   int GetNumRanks() { return num_ranks_; }
   Piece * GetEnPassantCandidate() const { return en_passant_candidate_; }
   void SetEnPassantCandidate(Piece * piece) { en_passant_candidate_ = piece; }
+  void Print(char (* printed_board)[64]) const;
 
 protected:
   int num_files_;

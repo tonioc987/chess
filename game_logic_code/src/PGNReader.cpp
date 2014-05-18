@@ -5,7 +5,6 @@
  *  See LICENSE file in the root of this project
  */
 
-#include <iostream>
 #include <fstream>
 #include <cassert>
 #include "PGNReader.h"

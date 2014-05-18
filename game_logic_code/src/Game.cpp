@@ -115,5 +115,9 @@ string Game::GetLastMove() {
   return movements_.back()->move;
 }
 
+void Game::Print(char (* printed_board)[64]) const {
+  board_->Print(printed_board);
+}
+
 }
 }

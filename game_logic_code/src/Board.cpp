@@ -71,5 +71,21 @@ string Board::FEN() const {
   return fen;
 }
 
+void Board::Print(char (* printed_board)[64]) const {
+  char * c = *printed_board;
+  char space = '.';
+
+  for(auto rank = board_.rbegin(); rank != board_.rend(); ++rank) {
+    for(auto cell = rank->begin(); cell != rank->end(); ++cell) {
+      if(*cell) {
+        *c = ((*cell)->FEN()).c_str()[0];
+      } else {
+        *c = space;
+      }
+      c++;
+    }
+  }
+}
+
 }
 }

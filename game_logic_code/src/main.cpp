@@ -1,4 +1,4 @@
-#include <iostream>
+#include <ncurses.h>
 #include <getopt.h>
 #include <tuple>
 #include "Game.h"
@@ -12,10 +12,9 @@ using namespace std;
 using namespace acortes::chess;
 
 tuple<string, string,bool,bool,long,long> ParseArguments(int argc, char* argv[]);
-void PrintUsage();
+string PrintUsage();
 
-int main(int argc, char* argv[])
-{
+int GameAnalysis(int argc, char* argv[]) {
   string engine_path;
   string pgnfile;
   bool analize_light;
@@ -40,6 +39,54 @@ int main(int argc, char* argv[])
   delete board;
 
   return 0;
+}
+
+int DisplayGame(int argc, char* argv[]) {
+  string pgnfile = string(argv[1]);
+  char printed_board [64];
+  char space = ' ';
+  char new_line = '\n';
+  int c;
+
+  Board *board = new Board(8,8);
+  PGNReader pgn(pgnfile);
+  PGNPlayer *player1 = new PGNPlayer(Color::Light, &pgn);
+  PGNPlayer *player2 = new PGNPlayer(Color::Dark, &pgn);
+  Game game(board, player1, player2);
+  game.InitialSetup();
+
+  while(game.Move()) {
+    clear();
+    game.Print(&printed_board);
+    for(int r = 0; r < 8; ++r) {
+      for(int c = 0; c < 8; ++c) {
+        addch(printed_board[(r*8)+c]);
+        addch(space);
+      }
+      addch(new_line);
+    }
+    refresh();
+    c = getch();
+  }
+
+  delete player1;
+  delete player2;
+  delete board;
+
+  return 0;
+}
+
+int main(int argc, char* argv[]) {
+  // ncurses initialization
+  initscr();
+  cbreak();
+  noecho();
+  keypad(stdscr, TRUE);
+
+  return DisplayGame(argc, argv);
+
+  // ncurses clean up
+  endwin();
 }
 
 tuple<string, string, bool, bool, long, long> ParseArguments(int argc, char * argv[]) {
@@ -116,8 +163,7 @@ tuple<string, string, bool, bool, long, long> ParseArguments(int argc, char * ar
   return make_tuple(engine, pgnfile, analize_light, analize_dark, time_per_move, blunder_threshold);
 }
 
-void PrintUsage() {
-  cout << "chess-analyzer --engine=path-to-engine --pgnfile=path-to-pgn [--analize_light] "
-       << "[--analize-dark] [--time_per_move=seconds] [--blunder_threshold=centipawns]"
-       << endl;
+string PrintUsage() {
+  return "chess-analyzer --engine=path-to-engine --pgnfile=path-to-pgn [--analize_light] "
+          "[--analize-dark] [--time_per_move=seconds] [--blunder_threshold=centipawns]";
 }

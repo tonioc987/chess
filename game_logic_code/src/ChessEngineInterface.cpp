@@ -7,7 +7,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
-#include <iostream>
 #include "ChessEngineInterface.h"
 
 using namespace std;
@@ -117,9 +116,9 @@ void ChessEngineInterface::ReadLines(vector<string> & lines) {
       if(*current == '\n') {
         temp_string_.append(start, current);
         lines.push_back(temp_string_);
-        if (verbose_) {
-          cout << temp_string_ << endl;
-        }
+        //if (verbose_) {
+        //  cout << temp_string_ << endl;
+        //}
         temp_string_.clear();
         start = current + 1;
       }
@@ -174,9 +173,9 @@ void ChessEngineInterface::Analyze(Game game, bool analyze_white, bool analyze_b
     bool is_white_turn = game.IsWhiteTurn();
 
     if(game.Move()) {
-      cout << game.GetLastMove() << ",";
-      cout << game.FEN() << ",";
-      cout.flush();
+      //cout << game.GetLastMove() << ",";
+      //cout << game.FEN() << ",";
+      //cout.flush();
       if((is_white_turn && analyze_white) ||
          (!is_white_turn && analyze_black)) {
         auto engine_option = Analyze(pre_FEN, time_per_move);
@@ -185,11 +184,11 @@ void ChessEngineInterface::Analyze(Game game, bool analyze_white, bool analyze_b
 
         if((is_white_turn && diff > blunder_threshold) ||
            (!is_white_turn && diff < -blunder_threshold)) {
-          cout << player_option.first << "," << player_option.second << ",";
-          cout << engine_option.first << "," << engine_option.second << ",";
+          //cout << player_option.first << "," << player_option.second << ",";
+          //cout << engine_option.first << "," << engine_option.second << ",";
         }
       }
-      cout << endl;
+      //cout << endl;
     } else {
       break;
     }

@@ -26,6 +26,7 @@ public:
   std::string FEN() const;
   bool IsWhiteTurn() const { return is_white_turn_;}
   std::string GetLastMove();
+  void Print(char (* printed_board)[64]) const;
 
 private:
   Board *board_;
