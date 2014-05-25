@@ -46,7 +46,7 @@ int DisplayGame(int argc, char* argv[]) {
   char printed_board [64];
   char space = ' ';
   char new_line = '\n';
-  int c;
+  int tmp;
 
   Board *board = new Board(8,8);
   PGNReader pgn(pgnfile);
@@ -60,13 +60,22 @@ int DisplayGame(int argc, char* argv[]) {
     game.Print(&printed_board);
     for(int r = 0; r < 8; ++r) {
       for(int c = 0; c < 8; ++c) {
-        addch(printed_board[(r*8)+c]);
+        tmp = printed_board[(r*8)+c];
+
+        if(tmp == '.') {
+          addch(tmp | A_BOLD | COLOR_PAIR(3));
+        } else if(isupper(tmp)) {
+          addch(tmp | A_BOLD | COLOR_PAIR(1));
+        } else {
+          addch(tmp | A_BOLD | COLOR_PAIR(2));
+        }
+
         addch(space);
       }
       addch(new_line);
     }
     refresh();
-    c = getch();
+    tmp = getch();
   }
 
   delete player1;
@@ -82,8 +91,12 @@ int main(int argc, char* argv[]) {
   cbreak();
   noecho();
   keypad(stdscr, TRUE);
+  start_color();
+  init_pair(1, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(2, COLOR_CYAN, COLOR_BLACK);
+  init_pair(3, COLOR_WHITE, COLOR_BLACK);
 
-  return DisplayGame(argc, argv);
+  DisplayGame(argc, argv);
 
   // ncurses clean up
   endwin();
