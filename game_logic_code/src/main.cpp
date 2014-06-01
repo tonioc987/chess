@@ -41,12 +41,53 @@ int GameAnalysis(int argc, char* argv[]) {
   return 0;
 }
 
-int DisplayGame(int argc, char* argv[]) {
-  string pgnfile = string(argv[1]);
-  char printed_board [64];
+struct ChessGameState {
+  struct ChessGameState * next;
+  struct ChessGameState * prev;
+  struct ChessGameState * alternatives;
+  string move;
+  string FEN;
+
+  ChessGameState() :
+    next(nullptr), prev(nullptr), alternatives(nullptr) {}
+  ChessGameState(string move, string FEN) :
+    next(nullptr), prev(nullptr), alternatives(nullptr),
+    move(move), FEN(FEN) {}
+};
+
+void PrintFEN(string FEN) {
   char space = ' ';
   char new_line = '\n';
-  int tmp;
+  int num_spaces = 0;
+
+  for(char & c : FEN) {
+    if(c == ' ') {
+      break;
+    }
+    else if(c == '/') {
+      addch(new_line);
+    }
+    else if(c > '0' && c <= '9') {
+      num_spaces = c - '0';
+      for(int i = 0; i < num_spaces; ++i) {
+        addch('.' | A_BOLD | COLOR_PAIR(3));
+        addch(space);
+      }
+    }
+    else if(isupper(c)) {
+      addch(c | A_BOLD | COLOR_PAIR(1));
+      addch(space);
+    }
+    else {
+      addch(c | A_BOLD | COLOR_PAIR(2));
+      addch(space);
+    }
+  }
+}
+
+int DisplayGame(int argc, char* argv[]) {
+  string pgnfile = string(argv[1]);
+  int tmp = ' ';
 
   Board *board = new Board(8,8);
   PGNReader pgn(pgnfile);
@@ -55,27 +96,31 @@ int DisplayGame(int argc, char* argv[]) {
   Game game(board, player1, player2);
   game.InitialSetup();
 
+  ChessGameState * start_game = new ChessGameState;
+  ChessGameState * last_move = start_game;
+
   while(game.Move()) {
+    last_move->next = new ChessGameState(game.GetLastMove(), game.FEN());
+    last_move->next->prev = last_move;
+    last_move = last_move->next;
+  }
+
+  last_move = start_game->next;
+  while(tmp != 'x') {
     clear();
-    game.Print(&printed_board);
-    for(int r = 0; r < 8; ++r) {
-      for(int c = 0; c < 8; ++c) {
-        tmp = printed_board[(r*8)+c];
-
-        if(tmp == '.') {
-          addch(tmp | A_BOLD | COLOR_PAIR(3));
-        } else if(isupper(tmp)) {
-          addch(tmp | A_BOLD | COLOR_PAIR(1));
-        } else {
-          addch(tmp | A_BOLD | COLOR_PAIR(2));
-        }
-
-        addch(space);
-      }
-      addch(new_line);
-    }
+    PrintFEN(last_move->FEN);
     refresh();
     tmp = getch();
+    if(tmp == KEY_LEFT) {
+      if(last_move->prev != start_game) {
+        last_move = last_move->prev;
+      }
+    }
+    else if (tmp == KEY_RIGHT) {
+      if(last_move->next) {
+        last_move = last_move->next;
+      }
+    }
   }
 
   delete player1;
