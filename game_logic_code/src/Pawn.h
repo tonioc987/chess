@@ -14,35 +14,38 @@ namespace chess {
 
 class Pawn {
 public:
-  static bool IsValidMove(uint8_t (&board)[8][8], Movement & movement){
-    bool is_white = (Color::WHITE == board[movement.source_rank][movement.source_file]);
+  static bool IsValidMove(uint8_t (&board)[8][8], int file, int rank, Movement & move){
+    bool is_white = (Color::WHITE == board[rank][file]);
     const int rank_initial = (is_white) ? 1 : 6 ;
-    const int rank_one_step = (is_white) ? movement.source_rank+1 : movement.source_rank-1 ;
-    const int rank_two_steps = (is_white) ? movement.source_rank+2 : movement.source_rank-2 ;
+    const int rank_one_step = (is_white) ? rank+1 : rank-1 ;
+    const int rank_two_steps = (is_white) ? rank+2 : rank-2 ;
 
+    if(move.color != board[rank][file]) {
+      return false;
+    }
     // forward move within the same file
     // when they are in the starting position, they can move two squares
     // No pieces should be in front of the pawn
-    if (movement.dest_file == movement.source_file &&
-        PieceType::EMPTY == board[rank_one_step][movement.source_file] &&
-        ( (movement.dest_rank == rank_one_step) ||
-          (movement.source_rank == rank_initial && movement.dest_rank == rank_two_steps &&
-              PieceType::EMPTY == board[rank_two_steps][movement.source_file] ) ) ) {
+    if (move.dest_file == file &&
+        PieceType::EMPTY == board[rank_one_step][file] &&
+        ( (move.dest_rank == rank_one_step) ||
+          (rank == rank_initial && move.dest_rank == rank_two_steps &&
+              PieceType::EMPTY == board[rank_two_steps][file] ) ) ) {
       return true;
     }
 
     // side move to capture to the left
-    if (movement.source_file > 0 &&
-        movement.dest_file == movement.source_file-1 &&
-        movement.dest_rank == rank_one_step/*&&
+    if (file > 0 &&
+        move.dest_file == file-1 &&
+        move.dest_rank == rank_one_step/*&&
         is there an enemy piece */) {
       return true;
     }
 
     // side move to capture to the right
-    if (movement.source_file < 8 /*replace by board size*/-1 &&
-        movement.dest_file == movement.source_file+1 &&
-        movement.dest_rank == rank_one_step) {
+    if (file < 8 /*replace by board size*/-1 &&
+        move.dest_file == file+1 &&
+        move.dest_rank == rank_one_step) {
       return true;
     }
 

@@ -14,13 +14,13 @@ namespace chess {
 
 class Rook {
 public:
-  static bool IsValidMove(uint8_t (&board)[8][8], Movement & movement){
-    int file_movement = abs(movement.source_file - movement.dest_file);
-    int rank_movement = abs(movement.source_rank - movement.dest_rank);
-    assert(movement.dest_rank >= 0 && movement.dest_rank < 8);
-    assert(movement.dest_file >= 0 && movement.dest_file < 8);
+  static bool IsValidMove(uint8_t (&board)[8][8], int file, int rank, Movement & move){
+    int file_movement = abs(file - move.dest_file);
+    int rank_movement = abs(rank - move.dest_rank);
+    assert(move.dest_rank >= 0 && move.dest_rank < 8);
+    assert(move.dest_file >= 0 && move.dest_file < 8);
 
-    if(movement.source_file == -1 || movement.source_rank == -1 ) {
+    if(file == -1 || rank == -1 || move.color != board[rank][file]) {
       // piece not in the board
       return false;
     } else if(file_movement == 0 && rank_movement == 0) {
@@ -29,10 +29,10 @@ public:
     } else if(file_movement == 0 && rank_movement !=0) {
       // forward/backward movement
       // check no pieces in between
-      int start_rank = (movement.source_rank < movement.dest_rank) ? movement.source_rank + 1 : movement.dest_rank + 1;
-      int end_rank = (movement.source_rank < movement.dest_rank) ? movement.dest_rank : movement.source_rank;
+      int start_rank = (rank < move.dest_rank) ? rank + 1 : move.dest_rank + 1;
+      int end_rank = (rank < move.dest_rank) ? move.dest_rank : rank;
       for(int r = start_rank; r < end_rank; r++) {
-        if(PieceType::EMPTY != board[r][movement.source_file]) {
+        if(PieceType::EMPTY != board[r][file]) {
           return false;
         }
       }
@@ -40,10 +40,10 @@ public:
     } else if(file_movement != 0 && rank_movement ==0) {
       // left/right movement
       // check no pieces in between
-      int start_file = (movement.source_file < movement.dest_file) ? movement.source_file + 1 : movement.dest_file + 1;
-      int end_file = (movement.source_file < movement.dest_file) ? movement.dest_file : movement.source_file;
+      int start_file = (file < move.dest_file) ? file + 1 : move.dest_file + 1;
+      int end_file = (file < move.dest_file) ? move.dest_file : file;
       for(int f = start_file; f < end_file; f++) {
-        if(PieceType::EMPTY != board[movement.source_rank][f]) {
+        if(PieceType::EMPTY != board[rank][f]) {
           return false;
         }
       }

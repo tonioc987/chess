@@ -40,6 +40,10 @@ inline bool operator ==(Color c, uint8_t p) {
   return static_cast<uint8_t>(c) == (0x80 & p);
 }
 
+inline bool operator !=(Color c, uint8_t p) {
+  return static_cast<uint8_t>(c) != (0x80 & p);
+}
+
 inline std::string piece_to_string(uint8_t p) {
   char c = static_cast<char>(p & 0x7F);
   if(p & 0x80) {
@@ -72,6 +76,7 @@ struct Movement {
   PieceType promoted_piece;
   std::string move;
   PieceType piece;
+  Color color;
 
   Movement() {
     source_file = -1;
@@ -88,6 +93,7 @@ struct Movement {
     promoted_piece = PieceType::EMPTY;
     move = "";
     piece = PieceType::EMPTY;
+    color = Color::WHITE;
   }
 };
 

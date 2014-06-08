@@ -24,6 +24,7 @@ PGNReader::PGNReader(std::string filename) {
   std::ifstream pgn_file(filename);
   std::string line;
   std::string move;
+  Color color = Color::WHITE;
 
   if(pgn_file.is_open()) {
     while(std::getline(pgn_file, line)) {
@@ -46,7 +47,8 @@ PGNReader::PGNReader(std::string filename) {
 
           move.clear();
           while(i < line.size() && !isspace(line[i])) { move += line[i]; i++; }
-          moves_.push_back(ParseMove(move));
+          moves_.push_back(ParseMove(move, color));
+          color = (color == Color::WHITE) ? Color::BLACK : Color::WHITE;
         }
       }
     }
@@ -56,11 +58,12 @@ PGNReader::PGNReader(std::string filename) {
 }
 
 
-Movement * PGNReader::ParseMove(std::string move) {
+Movement * PGNReader::ParseMove(std::string move, Color color) {
   Movement * m = new Movement;
   int i = move.size() - 1;
 
   m->move = move;
+  m->color = color;
 
   // process castles first
   if(move.compare("O-O") == 0) {

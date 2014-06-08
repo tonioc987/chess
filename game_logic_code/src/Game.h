@@ -28,7 +28,7 @@ public:
   void Print(char (* printed_board)[64]) const;
 
 private:
-  uint8_t _board[8][8];
+  uint8_t board_[8][8];
   std::vector<Movement *> movements_;
   bool is_white_turn_;
   int halfmove_clock_;
@@ -37,7 +37,7 @@ private:
   bool white_long_castle_;
   bool black_short_castle_;
   bool black_long_castle_;
-  std::map<PieceType, bool (*)(uint8_t (&board)[8][8], Movement & movement)> is_valid_move_;
+  std::map<PieceType, bool (*)(uint8_t (&board)[8][8], int file, int rank, Movement & movement)> is_valid_move_;
   bool FindPiece(Movement * move);
   bool FindPiece(PieceType piece, int file = -1, int rank = -1) const;
 };

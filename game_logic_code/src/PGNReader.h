@@ -24,7 +24,7 @@ public:
 
 private:
   std::vector<Movement *> moves_;
-  Movement* ParseMove(std::string move);
+  Movement* ParseMove(std::string move, Color color);
 };
 
 }
