@@ -10,17 +10,19 @@
 #include <queue>
 #include <string>
 #include <utility>
-#include "Game.h"
 
 namespace acortes {
 namespace chess {
+
+class Game;
+class PGNReader;
 
 class ChessEngineInterface {
 
 public:
   ChessEngineInterface(std::string engine_path, bool verbose = false);
   void Initialize();
-  void Analyze(Game game, bool analyze_white, bool analyze_black,
+  void Analyze(Game & game, PGNReader & pgn, bool analyze_white, bool analyze_black,
       long time_per_move, long blunder_threshold);
   ~ChessEngineInterface();
 

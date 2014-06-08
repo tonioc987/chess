@@ -5,9 +5,6 @@
  */
 #include "gtest/gtest.h"
 #include "Game.h"
-#include "Player.h"
-#include "PGNPlayer.h"
-#include "Board.h"
 #include "PGNReader.h"
 #include <utility>
 #include <iostream>
@@ -19,21 +16,14 @@ using namespace acortes::chess;
 class TestAllMovements : public ::testing::TestWithParam<vector<pair<string,string>>> {
 protected:
   virtual void SetUp() {
-    board_ = new Board(8,8);
   }
 
   virtual void TearDown() {
     delete game_;
-    delete player1_;
-    delete player2_;
     delete pgn_;
-    delete board_;
   }
 
-  Board *board_;
   PGNReader * pgn_;
-  PGNPlayer *player1_;
-  PGNPlayer *player2_;
   Game * game_;
 };
 
@@ -55,19 +45,17 @@ TEST_P(TestAllMovements, Test) {
 
   // initialize all variables
   pgn_ = new PGNReader(filename);
-  player1_ = new PGNPlayer(Color::Light, pgn_);
-  player2_ = new PGNPlayer(Color::Dark, pgn_);
-  game_ = new Game(board_, player1_, player2_);
+  game_ = new Game;
   game_->InitialSetup();
 
   // starting position
   ASSERT_EQ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", game_->FEN());
 
   // validate all movements
-  for(const auto & move : movements) {
-    game_->Move();
-    cout << move.first << " --> " << game_->FEN() << endl;
-    ASSERT_EQ(move.second, game_->FEN());
+  for(size_t i = 0; i < movements.size(); ++i) {
+    game_->Move(pgn_->GetMove(i));
+    cout << game_->GetLastMove() << " --> " << game_->FEN() << endl;
+    ASSERT_EQ(movements[i].second, game_->FEN());
   }
 };
 

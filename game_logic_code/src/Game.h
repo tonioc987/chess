@@ -10,30 +10,36 @@
 
 #include "Common.h"
 #include <vector>
+#include <map>
 
 namespace acortes {
 namespace chess {
 
-class Board;
-class Player;
 struct Movement;
 
 class Game {
 public:
-  Game(Board * board, Player * player1, Player * player2);
+  Game();
   void InitialSetup();
-  bool Move();
+  bool Move(Movement * move);
   std::string FEN() const;
   bool IsWhiteTurn() const { return is_white_turn_;}
   std::string GetLastMove();
   void Print(char (* printed_board)[64]) const;
 
 private:
-  Board *board_;
-  Player *(players_[2]);
+  uint8_t _board[8][8];
   std::vector<Movement *> movements_;
   bool is_white_turn_;
   int halfmove_clock_;
+  Square en_passant_candidate_;
+  bool white_short_castle_;
+  bool white_long_castle_;
+  bool black_short_castle_;
+  bool black_long_castle_;
+  std::map<PieceType, bool (*)(uint8_t (&board)[8][8], Movement & movement)> is_valid_move_;
+  bool FindPiece(Movement * move);
+  bool FindPiece(PieceType piece, int file = -1, int rank = -1) const;
 };
 
 }

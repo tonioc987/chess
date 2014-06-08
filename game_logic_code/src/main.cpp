@@ -2,9 +2,6 @@
 #include <getopt.h>
 #include <tuple>
 #include "Game.h"
-#include "Player.h"
-#include "PGNPlayer.h"
-#include "Board.h"
 #include "PGNReader.h"
 #include "ChessEngineInterface.h"
 
@@ -24,19 +21,12 @@ int GameAnalysis(int argc, char* argv[]) {
   tie(engine_path, pgnfile, analize_light, analize_dark, time_per_move, blunder_threshold) =
       ParseArguments(argc, argv);
 
-  Board *board = new Board(8,8);
   PGNReader pgn(pgnfile);
-  PGNPlayer *player1 = new PGNPlayer(Color::Light, &pgn);
-  PGNPlayer *player2 = new PGNPlayer(Color::Dark, &pgn);
-  Game game(board, player1, player2);
+  Game game;
   game.InitialSetup();
 
   ChessEngineInterface engine(engine_path, false);
-  engine.Analyze(game, analize_light, analize_dark, time_per_move, blunder_threshold);
-
-  delete player1;
-  delete player2;
-  delete board;
+  engine.Analyze(game, pgn, analize_light, analize_dark, time_per_move, blunder_threshold);
 
   return 0;
 }
@@ -88,18 +78,17 @@ void PrintFEN(string FEN) {
 int DisplayGame(int argc, char* argv[]) {
   string pgnfile = string(argv[1]);
   int tmp = ' ';
+  int current_move = 0;
+  Movement * move = nullptr;
 
-  Board *board = new Board(8,8);
   PGNReader pgn(pgnfile);
-  PGNPlayer *player1 = new PGNPlayer(Color::Light, &pgn);
-  PGNPlayer *player2 = new PGNPlayer(Color::Dark, &pgn);
-  Game game(board, player1, player2);
+  Game game;
   game.InitialSetup();
 
   ChessGameState * start_game = new ChessGameState;
   ChessGameState * last_move = start_game;
 
-  while(game.Move()) {
+  while((move = pgn.GetMove(current_move))) {
     last_move->next = new ChessGameState(game.GetLastMove(), game.FEN());
     last_move->next->prev = last_move;
     last_move = last_move->next;
@@ -122,10 +111,6 @@ int DisplayGame(int argc, char* argv[]) {
       }
     }
   }
-
-  delete player1;
-  delete player2;
-  delete board;
 
   return 0;
 }

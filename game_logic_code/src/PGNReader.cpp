@@ -8,7 +8,7 @@
 #include <fstream>
 #include <cassert>
 #include "PGNReader.h"
-#include "Movement.h"
+#include "Common.h"
 #include "Pawn.h"
 #include "Rook.h"
 #include "Knight.h"
@@ -138,23 +138,23 @@ Movement * PGNReader::ParseMove(std::string move) {
   assert(i==0);
   switch(move[i]) {
     case 'R': {
-      m->piece_type = &typeid(acortes::chess::Rook);
+      m->piece = PieceType::ROOK;
       break;
     }
     case 'B': {
-      m->piece_type = &typeid(acortes::chess::Bishop);
+      m->piece = PieceType::BISHOP;
       break;
     }
     case 'N': {
-      m->piece_type = &typeid(acortes::chess::Knight);
+      m->piece = PieceType::KNIGHT;
       break;
     }
     case 'Q': {
-      m->piece_type = &typeid(acortes::chess::Queen);
+      m->piece = PieceType::QUEEN;
       break;
     }
     case 'K': {
-      m->piece_type = &typeid(acortes::chess::King);
+      m->piece = PieceType::KING;
       break;
     }
     case 'a':
@@ -165,7 +165,7 @@ Movement * PGNReader::ParseMove(std::string move) {
     case 'f':
     case 'g':
     case 'h': {
-      m->piece_type = &typeid(acortes::chess::Pawn);
+      m->piece = PieceType::PAWN;
       break;
     }
     default: {

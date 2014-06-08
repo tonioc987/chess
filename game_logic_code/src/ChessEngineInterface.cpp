@@ -8,6 +8,8 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include "ChessEngineInterface.h"
+#include "Game.h"
+#include "PGNReader.h"
 
 using namespace std;
 
@@ -162,9 +164,12 @@ void ChessEngineInterface::WriteLine(string msg) {
   Write(msg.append("\n"));
 }
 
-void ChessEngineInterface::Analyze(Game game, bool analyze_white, bool analyze_black,
+void ChessEngineInterface::Analyze(Game & game, PGNReader & pgn, bool analyze_white, bool analyze_black,
     long time_per_move, long blunder_threshold) {
-  do {
+  int current_move = 0;
+  Movement * move = nullptr;
+
+  while((move = pgn.GetMove(current_move))) {
     string pre_FEN = game.FEN();
     // game.Move() changes the state of IsWhiteTurn,
     // is_white_turn stores who is going to move next, then
@@ -172,7 +177,7 @@ void ChessEngineInterface::Analyze(Game game, bool analyze_white, bool analyze_b
     // that's why is_white_turn is stored before making the move
     bool is_white_turn = game.IsWhiteTurn();
 
-    if(game.Move()) {
+    if(game.Move(move)) {
       //cout << game.GetLastMove() << ",";
       //cout << game.FEN() << ",";
       //cout.flush();
@@ -192,7 +197,7 @@ void ChessEngineInterface::Analyze(Game game, bool analyze_white, bool analyze_b
     } else {
       break;
     }
-  } while(true);
+  }
 }
 
 pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
