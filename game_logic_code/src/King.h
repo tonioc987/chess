@@ -15,10 +15,14 @@ namespace chess {
 class King {
 public:
   static bool IsValidMove(uint8_t (&board)[8][8], int file, int rank, Movement & move){
+    if((move.is_short_castle || move.is_long_castle) && move.color == board[rank][file]) {
+      return true;
+    }
+
     int file_movement = abs(file - move.dest_file);
     int rank_movement = abs(rank - move.dest_rank);
-    assert(move.dest_rank >= 0 && move.dest_rank < 8);
-    assert(move.dest_file >= 0 && move.dest_file < 8);
+    /*assert(move.dest_rank >= 0 && move.dest_rank < 8);
+    assert(move.dest_file >= 0 && move.dest_file < 8);*/
 
     if(file == -1 || rank == -1 || move.color != board[rank][file]) {
       // piece not in the board

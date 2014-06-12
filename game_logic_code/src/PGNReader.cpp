@@ -68,9 +68,11 @@ Movement * PGNReader::ParseMove(std::string move, Color color) {
   // process castles first
   if(move.compare("O-O") == 0) {
     m->is_short_castle = true;
+    m->piece = PieceType::KING;
     return m;
   } else if (move.compare("O-O-O") == 0) {
     m->is_long_castle = true;
+    m->piece = PieceType::KING;
     return m;
   }
 

@@ -32,7 +32,9 @@ private:
   std::vector<Movement *> movements_;
   bool is_white_turn_;
   int halfmove_clock_;
-  Square en_passant_candidate_;
+  int en_passant_file_;
+  int en_passant_rank_;
+  int en_passant_capture_rank_;
   bool white_short_castle_;
   bool white_long_castle_;
   bool black_short_castle_;

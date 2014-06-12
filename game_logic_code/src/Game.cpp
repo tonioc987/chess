@@ -22,7 +22,9 @@ namespace chess {
 Game::Game() :
   is_white_turn_(true),
   halfmove_clock_(0),
-  en_passant_candidate_{-1,-1} {
+  en_passant_file_{-1},
+  en_passant_rank_{-1},
+  en_passant_capture_rank_{-1} {
 
   is_valid_move_[PieceType::KING] = &(King::IsValidMove);
   is_valid_move_[PieceType::QUEEN] = &(Queen::IsValidMove);
@@ -76,24 +78,55 @@ void Game::InitialSetup() {
 bool Game::Move(Movement * move) {
   assert(move != nullptr);
 
-  if(move->is_short_castle || move->is_long_castle) {
-    assert(move->is_short_castle ^ move->is_long_castle);
-    //King * king = static_cast<King *>(FindPiece(PieceType::KING));
-    //king->Castle(move->is_short_castle);
-    //move->piece = king;
-  } else if(FindPiece(move)){
+  if(FindPiece(move)){
 
-    if(move->is_capture) {
-      // TODO: validate there is a piece of the other color
+    if(move->is_short_castle) {
+      // move king
+      board_[move->source_rank][move->source_file+2] =
+          board_[move->source_rank][move->source_file];
+      board_[move->source_rank][move->source_file] =
+          static_cast<uint8_t>(PieceType::EMPTY);
+      // move rook
+      board_[move->source_rank][move->source_file+2-1] =
+          board_[move->source_rank][move->source_file+3];
+      board_[move->source_rank][move->source_file+3] =
+          static_cast<uint8_t>(PieceType::EMPTY);
+    } else if(move->is_long_castle) {
+      board_[move->source_rank][move->source_file-2] =
+          board_[move->source_rank][move->source_file];
+      board_[move->source_rank][move->source_file] =
+          static_cast<uint8_t>(PieceType::EMPTY);
+      // move rook
+      board_[move->source_rank][move->source_file-2+1] =
+          board_[move->source_rank][move->source_file-4];
+      board_[move->source_rank][move->source_file-4] =
+          static_cast<uint8_t>(PieceType::EMPTY);
+    } else {
+      if(move->is_capture) {
+        // TODO: validate there is a piece of the other color
+        if((PieceType::PAWN == move->piece) &&
+            (en_passant_file_ == move->dest_file) &&
+            (en_passant_capture_rank_ == move->dest_rank)) {
+          board_[en_passant_rank_][en_passant_file_] =
+              static_cast<uint8_t>(PieceType::EMPTY);
+        }
+      }
+      board_[move->dest_rank][move->dest_file] = board_[move->source_rank][move->source_file];
+      board_[move->source_rank][move->source_file] = static_cast<uint8_t>(PieceType::EMPTY);
     }
-
-    board_[move->dest_rank][move->dest_file] = board_[move->source_rank][move->source_file];
-    board_[move->source_rank][move->source_file] = static_cast<uint8_t>(PieceType::EMPTY);
-    // if rook movement, remove appropriate castle
-    // if king move remove castle
-    // if castle remove castle
   } else {
     assert(false);
+  }
+
+  // TODO: if rook movement, remove appropriate castle
+  if(PieceType::KING == move->piece) {
+    if(Color::WHITE == move->color) {
+      white_short_castle_ = false;
+      white_long_castle_ = false;
+    } else {
+      black_short_castle_ = false;
+      black_long_castle_ = false;
+    }
   }
 
   movements_.push_back(move);
@@ -106,12 +139,15 @@ bool Game::Move(Movement * move) {
 
   // store en passant candidate
   if((PieceType::PAWN == move->piece) &&
-     (abs(move->source_rank - move->dest_rank) == 2)) {
-    en_passant_candidate_.file = move->dest_file;
-    en_passant_candidate_.rank = move->dest_rank;
+     (abs(move->dest_rank - move->source_rank) == 2)) {
+    en_passant_file_ = move->dest_file;
+    en_passant_rank_ = move->dest_rank;
+    en_passant_capture_rank_ = move->dest_rank -
+        ((move->dest_rank - move->source_rank)/2);
   } else {
-    en_passant_candidate_.file = -1;
-    en_passant_candidate_.rank = -1;
+    en_passant_file_ = -1;
+    en_passant_rank_ = -1;
+    en_passant_capture_rank_ = -1;
   }
 
   return move!=nullptr;
@@ -120,10 +156,13 @@ bool Game::Move(Movement * move) {
 
 bool Game::FindPiece(Movement * move) {
   bool found = false;
-  assert(move->dest_file >= 0);
+  /* TODO: is it really necessary to remove this assertions to make
+   * it work for the castle, or is it just better to enable the
+   * function below and simplify things.
+   * assert(move->dest_file >= 0);
   assert(move->dest_file < 8);
   assert(move->dest_rank >= 0);
-  assert(move->dest_rank < 8);
+  assert(move->dest_rank < 8);*/
 
   for(auto rank = 7; rank != -1; --rank) {
     for(auto file = 0; file != 8; ++file) {
@@ -225,16 +264,9 @@ string Game::FEN() const {
 
   // en passant
   fen.append(" ");
-  if(en_passant_candidate_.file != -1 and en_passant_candidate_.rank != -1) {
-    fen.append(1, GetFile(en_passant_candidate_.file));
-    int rank = en_passant_candidate_.rank;
-    // FEN records the position behind the pawn
-    if(is_white_turn_) { // black is en passant candidate
-      rank++;
-    } else {  // white is en passant candidate
-      rank--;
-    }
-    fen.append(1, GetRank(rank));
+  if(en_passant_file_ != -1) {
+    fen.append(1, GetFile(en_passant_file_));
+    fen.append(1, GetRank(en_passant_capture_rank_));
   } else {
     fen.append("-");
   }
