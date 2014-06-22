@@ -7,12 +7,12 @@
 
 #include <cassert>
 #include "Game.h"
-#include "Bishop.h"
-#include "King.h"
-#include "Knight.h"
-#include "Pawn.h"
-#include "Queen.h"
-#include "Rook.h"
+#include "pieces/Bishop.h"
+#include "pieces/King.h"
+#include "pieces/Knight.h"
+#include "pieces/Pawn.h"
+#include "pieces/Queen.h"
+#include "pieces/Rook.h"
 
 using namespace std;
 

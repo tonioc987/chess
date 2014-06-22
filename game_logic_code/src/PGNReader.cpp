@@ -9,12 +9,6 @@
 #include <cassert>
 #include "PGNReader.h"
 #include "Common.h"
-#include "Pawn.h"
-#include "Rook.h"
-#include "Knight.h"
-#include "Bishop.h"
-#include "Queen.h"
-#include "King.h"
 
 
 namespace acortes {
