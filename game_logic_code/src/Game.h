@@ -17,6 +17,9 @@ namespace chess {
 
 struct Movement;
 
+typedef  bool (*IsValidFunction)(uint8_t (&board)[8][8], int file, int rank, Movement & movement);
+typedef std::map<PieceType, IsValidFunction> IsValidMap;
+
 class Game {
 public:
   Game();
@@ -39,7 +42,7 @@ private:
   bool white_long_castle_;
   bool black_short_castle_;
   bool black_long_castle_;
-  std::map<PieceType, bool (*)(uint8_t (&board)[8][8], int file, int rank, Movement & movement)> is_valid_move_;
+  static const  IsValidMap is_valid_move_;
   bool FindPiece(Movement * move);
   bool FindPiece(PieceType piece, int file = -1, int rank = -1) const;
 };

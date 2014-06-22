@@ -19,19 +19,21 @@ using namespace std;
 namespace acortes {
 namespace chess {
 
+const IsValidMap Game::is_valid_move_ = {
+    { PieceType::KING, King::IsValidMove },
+    { PieceType::QUEEN, Queen::IsValidMove },
+    { PieceType::BISHOP, Bishop::IsValidMove },
+    { PieceType::KNIGHT, Knight::IsValidMove },
+    { PieceType::ROOK, Rook::IsValidMove },
+    { PieceType::PAWN, Pawn::IsValidMove }
+};
+
 Game::Game() :
   is_white_turn_(true),
   halfmove_clock_(0),
   en_passant_file_{-1},
   en_passant_rank_{-1},
   en_passant_capture_rank_{-1} {
-
-  is_valid_move_[PieceType::KING] = &(King::IsValidMove);
-  is_valid_move_[PieceType::QUEEN] = &(Queen::IsValidMove);
-  is_valid_move_[PieceType::BISHOP] = &(Bishop::IsValidMove);
-  is_valid_move_[PieceType::KNIGHT] = &(Knight::IsValidMove);
-  is_valid_move_[PieceType::ROOK] = &(Rook::IsValidMove);
-  is_valid_move_[PieceType::PAWN] = &(Pawn::IsValidMove);
 }
 
 
@@ -163,6 +165,8 @@ bool Game::FindPiece(Movement * move) {
   assert(move->dest_file < 8);
   assert(move->dest_rank >= 0);
   assert(move->dest_rank < 8);*/
+  IsValidMap::const_iterator it = Game::is_valid_move_.find(move->piece);
+  IsValidFunction valid = *(it->second);
 
   for(auto rank = 7; rank != -1; --rank) {
     for(auto file = 0; file != 8; ++file) {
@@ -170,7 +174,7 @@ bool Game::FindPiece(Movement * move) {
       // if can reach square, then filter by source square in case
       // the information exists
       if( move->piece == board_[rank][file] &&
-          is_valid_move_[move->piece](board_, file, rank, *move) &&
+          valid(board_, file, rank, *move) &&
           (move->source_file == -1 || file == move->source_file) &&
           (move->source_rank == -1 || rank == move->source_rank)) {
         // just one piece shall satisfy all conditions
