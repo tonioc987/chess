@@ -46,7 +46,6 @@ TEST_P(TestAllMovements, Test) {
   // initialize all variables
   pgn_ = new PGNReader(filename);
   game_ = new Game;
-  game_->InitialSetup();
 
   // starting position
   ASSERT_EQ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", game_->FEN());

@@ -23,7 +23,6 @@ int GameAnalysis(int argc, char* argv[]) {
 
   PGNReader pgn(pgnfile);
   Game game;
-  game.InitialSetup();
 
   ChessEngineInterface engine(engine_path, false);
   engine.Analyze(game, pgn, analize_light, analize_dark, time_per_move, blunder_threshold);
@@ -83,7 +82,6 @@ int DisplayGame(int argc, char* argv[]) {
 
   PGNReader pgn(pgnfile);
   Game game;
-  game.InitialSetup();
 
   ChessGameState * start_game = new ChessGameState;
   ChessGameState * last_move = start_game;

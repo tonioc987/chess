@@ -56,10 +56,6 @@ inline uint8_t operator |(Color c, PieceType p) {
   return (static_cast<uint8_t>(c)) + (static_cast<uint8_t>(p));
 }
 
-struct Square {
-  int8_t file;
-  int8_t rank;
-};
 
 struct Movement {
   int source_file;

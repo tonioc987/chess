@@ -177,26 +177,23 @@ void ChessEngineInterface::Analyze(Game & game, PGNReader & pgn, bool analyze_wh
     // that's why is_white_turn is stored before making the move
     bool is_white_turn = game.IsWhiteTurn();
 
-    if(game.Move(move)) {
-      //cout << game.GetLastMove() << ",";
-      //cout << game.FEN() << ",";
-      //cout.flush();
-      if((is_white_turn && analyze_white) ||
-         (!is_white_turn && analyze_black)) {
-        auto engine_option = Analyze(pre_FEN, time_per_move);
-        auto player_option = Analyze(game.FEN(), time_per_move);
-        auto diff = engine_option.first - player_option.first;
+    game.Move(move);
+    //cout << game.GetLastMove() << ",";
+    //cout << game.FEN() << ",";
+    //cout.flush();
+    if((is_white_turn && analyze_white) ||
+       (!is_white_turn && analyze_black)) {
+      auto engine_option = Analyze(pre_FEN, time_per_move);
+      auto player_option = Analyze(game.FEN(), time_per_move);
+      auto diff = engine_option.first - player_option.first;
 
-        if((is_white_turn && diff > blunder_threshold) ||
-           (!is_white_turn && diff < -blunder_threshold)) {
-          //cout << player_option.first << "," << player_option.second << ",";
-          //cout << engine_option.first << "," << engine_option.second << ",";
-        }
+      if((is_white_turn && diff > blunder_threshold) ||
+         (!is_white_turn && diff < -blunder_threshold)) {
+        //cout << player_option.first << "," << player_option.second << ",";
+        //cout << engine_option.first << "," << engine_option.second << ",";
       }
-      //cout << endl;
-    } else {
-      break;
     }
+    //cout << endl;
   }
 }
 
