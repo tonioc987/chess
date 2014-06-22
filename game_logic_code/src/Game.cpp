@@ -174,6 +174,7 @@ bool Game::FindPiece(Movement * move) {
       // if can reach square, then filter by source square in case
       // the information exists
       if( move->piece == board_[rank][file] &&
+          move->color == board_[rank][file] &&
           valid(board_, file, rank, *move) &&
           (move->source_file == -1 || file == move->source_file) &&
           (move->source_rank == -1 || rank == move->source_rank)) {
