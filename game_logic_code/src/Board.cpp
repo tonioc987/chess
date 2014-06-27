@@ -100,13 +100,19 @@ void Board::Move(Movement * move) {
           static_cast<uint8_t>(PieceType::EMPTY);
     } else {
       if(move->is_capture) {
-        // TODO: validate there is a piece of the other color
         if((PieceType::PAWN == move->piece) &&
             (en_passant_file_ == move->dest_file) &&
             (en_passant_capture_rank_ == move->dest_rank)) {
+          // simulate moving the pawn one square back, anyway it will be overwritten below
+          board_[move->dest_rank][move->dest_file] =
+              board_[en_passant_rank_][en_passant_file_];
           board_[en_passant_rank_][en_passant_file_] =
               static_cast<uint8_t>(PieceType::EMPTY);
         }
+
+        // validate pieces of opposite color
+        assert((Color::WHITE == board_[move->source_rank][move->source_file]) ^
+               (Color::WHITE == board_[move->dest_rank][move->dest_file]));
       }
       board_[move->dest_rank][move->dest_file] = board_[move->source_rank][move->source_file];
       board_[move->source_rank][move->source_file] = static_cast<uint8_t>(PieceType::EMPTY);
@@ -115,7 +121,7 @@ void Board::Move(Movement * move) {
     assert(false);
   }
 
-  // TODO: if rook movement, remove appropriate castle
+  // Update castle availability
   if(PieceType::KING == move->piece) {
     if(Color::WHITE == move->color) {
       white_short_castle_ = false;
@@ -123,6 +129,24 @@ void Board::Move(Movement * move) {
     } else {
       black_short_castle_ = false;
       black_long_castle_ = false;
+    }
+  } else if(PieceType::ROOK == move->piece) {
+    // testing just the source file is a weak test, but it is enough to
+    // determine that castle has been lost. Ideally, this variables should be
+    // set to false just once, but there is no side effect in setting them
+    // to false multiple times.
+    if(move->source_file == 0) {
+      if(Color::WHITE == move->color) {
+        white_long_castle_ = false;
+      } else {
+        black_long_castle_ = false;
+      }
+    } else if(move->source_file == 7) {
+      if(Color::WHITE == move->color) {
+        white_short_castle_ = false;
+      } else {
+        black_short_castle_ = false;
+      }
     }
   }
 
@@ -148,19 +172,15 @@ void Board::Move(Movement * move) {
   }
 
   move_number_++;
-
 }
 
 
 bool Board::FindPiece(Movement * move) {
   bool found = false;
-  /* TODO: is it really necessary to remove this assertions to make
-   * it work for the castle, or is it just better to enable the
-   * function below and simplify things.
-   * assert(move->dest_file >= 0);
-  assert(move->dest_file < 8);
-  assert(move->dest_rank >= 0);
-  assert(move->dest_rank < 8);*/
+
+  assert((move->dest_file >= 0 && move->dest_file < 8) || move->is_short_castle || move->is_long_castle);
+  assert((move->dest_rank >= 0 && move->dest_rank < 8) || move->is_short_castle || move->is_long_castle);
+
   IsValidMap::const_iterator it = Board::is_valid_move_.find(move->piece);
   IsValidFunction valid = *(it->second);
 
@@ -192,24 +212,6 @@ bool Board::FindPiece(Movement * move) {
   assert(found);
   return found;
 }
-
-
-// esto solo lo ocupo para enroque, puedo poner el cuadro origen arriba y
-// no usar esta function
-/*bool Board::FindPiece(PieceType piece, int file, int rank) const {
-  Piece * target_piece = nullptr;
-
-  for(auto const & piece : pieces_) {
-    if((piece->GetLongName().compare(long_name) == 0) &&
-       (file == -1 || piece->GetFile() == file) &&
-       (rank == -1 || piece->GetRank() == rank)) {
-      assert(target_piece == nullptr);
-      target_piece = piece;
-    }
-  }
-  assert(target_piece != nullptr);
-  return target_piece;
-}*/
 
 
 string Board::FEN() const {
