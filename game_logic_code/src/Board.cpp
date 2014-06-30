@@ -72,10 +72,31 @@ Board::Board() {
   white_long_castle_ = true;
   black_short_castle_ = true;
   black_long_castle_ = true;
+
+  centipawns = 0;
+  next = nullptr;
+  previous = nullptr;
+  alternative = nullptr;
 }
 
 
 void Board::Move(Movement * move) {
+  // if the movement is from UCI notation, then it has the source square
+  // but no piece type, just copy the piece type
+  if(move->source_file != -1 && move->source_rank != -1 &&
+      PieceType::EMPTY == move->piece) {
+    move->piece = GetPiece(board_[move->source_rank][move->source_file]);
+    move->color = GetColor(board_[move->source_rank][move->source_file]);
+
+    if(PieceType::KING == move->piece && move->source_file == 4) {
+      if(move->dest_file == 6) {
+        move->is_short_castle = true;
+      } else if (move->dest_file == 2) {
+        move->is_long_castle = true;
+      }
+    }
+  }
+
   if(FindPiece(move)){
     if(move->is_short_castle) {
       // move king

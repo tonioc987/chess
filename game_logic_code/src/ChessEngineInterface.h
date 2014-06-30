@@ -14,7 +14,7 @@
 namespace acortes {
 namespace chess {
 
-class Game;
+class Board;
 class PGNReader;
 
 class ChessEngineInterface {
@@ -22,7 +22,7 @@ class ChessEngineInterface {
 public:
   ChessEngineInterface(std::string engine_path, bool verbose = false);
   void Initialize();
-  void Analyze(Game & game, PGNReader & pgn, bool analyze_white, bool analyze_black,
+  void FullAnalysis(Board * board, bool analyze_white, bool analyze_black,
       long time_per_move, long blunder_threshold);
   ~ChessEngineInterface();
 
@@ -46,6 +46,7 @@ private:
   void Write(std::string msg);
   void WriteLine(std::string msg);
   std::pair<long, std::string> Analyze(std::string fen, long time_secs);
+  void AddAlternative(Board * board, std::string alternative);
 };
 
 }

@@ -4,9 +4,8 @@
  *  This program is under the terms of the GNU GPL v3
  *  See LICENSE file in the root of this project
  */
-
-#ifndef GAME_H_
-#define GAME_H_
+#ifndef UCIREADER_H_
+#define UCIREADER_H_
 
 #include "Common.h"
 #include <vector>
@@ -14,18 +13,18 @@
 namespace acortes {
 namespace chess {
 
-struct Board;
-class PGNReader;
+class Piece;
+struct Movement;
 
-class Game {
+class UCIReader {
 public:
-  Game();
-  Game(PGNReader & pgh);
-  void Move(Movement * move);
-  Board * InitialBoard();
+  UCIReader(std::string moves);
+  ~UCIReader();
+  Movement* GetMove(unsigned int n) const;
 
 private:
-  Board * initial_board_;
+  std::vector<Movement *> moves_;
+  Movement* ParseMove(std::string move);
 };
 
 }

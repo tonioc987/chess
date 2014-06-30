@@ -2,6 +2,7 @@
 #include <getopt.h>
 #include <tuple>
 #include "Game.h"
+#include "Board.h"
 #include "PGNReader.h"
 #include "ChessEngineInterface.h"
 
@@ -10,39 +11,6 @@ using namespace acortes::chess;
 
 tuple<string, string,bool,bool,long,long> ParseArguments(int argc, char* argv[]);
 string PrintUsage();
-
-int GameAnalysis(int argc, char* argv[]) {
-  string engine_path;
-  string pgnfile;
-  bool analize_light;
-  bool analize_dark;
-  long time_per_move;
-  long blunder_threshold;
-  tie(engine_path, pgnfile, analize_light, analize_dark, time_per_move, blunder_threshold) =
-      ParseArguments(argc, argv);
-
-  PGNReader pgn(pgnfile);
-  Game game;
-
-  ChessEngineInterface engine(engine_path, false);
-  engine.Analyze(game, pgn, analize_light, analize_dark, time_per_move, blunder_threshold);
-
-  return 0;
-}
-
-struct ChessGameState {
-  struct ChessGameState * next;
-  struct ChessGameState * prev;
-  struct ChessGameState * alternatives;
-  string move;
-  string FEN;
-
-  ChessGameState() :
-    next(nullptr), prev(nullptr), alternatives(nullptr) {}
-  ChessGameState(string move, string FEN) :
-    next(nullptr), prev(nullptr), alternatives(nullptr),
-    move(move), FEN(FEN) {}
-};
 
 void PrintFEN(string FEN) {
   char space = ' ';
@@ -74,44 +42,51 @@ void PrintFEN(string FEN) {
   }
 }
 
-int DisplayGame(int argc, char* argv[]) {
-  string pgnfile = string(argv[1]);
+
+int GameAnalysis(int argc, char* argv[]) {
   int tmp = ' ';
-  int current_move = 0;
-  Movement * move = nullptr;
+  string engine_path;
+  string pgnfile;
+  bool analize_light;
+  bool analize_dark;
+  long time_per_move;
+  long blunder_threshold;
+  tie(engine_path, pgnfile, analize_light, analize_dark, time_per_move, blunder_threshold) =
+      ParseArguments(argc, argv);
 
   PGNReader pgn(pgnfile);
-  Game game;
+  Game game(pgn);
 
-  ChessGameState * start_game = new ChessGameState;
-  ChessGameState * last_move = start_game;
+  ChessEngineInterface engine(engine_path, false);
+  engine.FullAnalysis(game.InitialBoard(), analize_light, analize_dark, time_per_move, blunder_threshold);
 
-  while((move = pgn.GetMove(current_move))) {
-    last_move->next = new ChessGameState(game.GetLastMove(), game.FEN());
-    last_move->next->prev = last_move;
-    last_move = last_move->next;
-  }
+  Board * board = game.InitialBoard();
 
-  last_move = start_game->next;
   while(tmp != 'x') {
     clear();
-    PrintFEN(last_move->FEN);
+    PrintFEN(board->FEN().c_str());
+    string alternative = "";
+    if(board->alternative) {
+      alternative = board->alternative->GetMove();
+    }
+    printw("\n%ld: %s", board->centipawns, alternative.c_str());
     refresh();
     tmp = getch();
     if(tmp == KEY_LEFT) {
-      if(last_move->prev != start_game) {
-        last_move = last_move->prev;
+      if(board != game.InitialBoard()) {
+        board = board->previous;
       }
     }
     else if (tmp == KEY_RIGHT) {
-      if(last_move->next) {
-        last_move = last_move->next;
+      if(board->next != nullptr) {
+        board = board->next;
       }
     }
   }
 
   return 0;
 }
+
 
 int main(int argc, char* argv[]) {
   // ncurses initialization
@@ -124,7 +99,7 @@ int main(int argc, char* argv[]) {
   init_pair(2, COLOR_CYAN, COLOR_BLACK);
   init_pair(3, COLOR_WHITE, COLOR_BLACK);
 
-  DisplayGame(argc, argv);
+  GameAnalysis(argc, argv);
 
   // ncurses clean up
   endwin();

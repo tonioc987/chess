@@ -56,6 +56,14 @@ inline uint8_t operator |(Color c, PieceType p) {
   return (static_cast<uint8_t>(c)) + (static_cast<uint8_t>(p));
 }
 
+inline PieceType GetPiece(uint8_t p) {
+  return static_cast<PieceType>(0x7F & p);
+}
+
+inline Color GetColor(uint8_t p) {
+  return static_cast<Color>(0x80 & p);
+}
+
 
 struct Movement {
   int source_file;

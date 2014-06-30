@@ -41,9 +41,14 @@ private:
   bool black_long_castle_;
 
   bool FindPiece(Movement * move);
-  bool FindPiece(PieceType piece, int file = -1, int rank = -1) const;
 
   static const  IsValidMap is_valid_move_;
+
+public:
+  long centipawns;
+  Board * next;
+  Board * previous;
+  Board * alternative;
 };
 
 }

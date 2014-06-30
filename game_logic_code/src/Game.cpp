@@ -8,6 +8,7 @@
 #include <cassert>
 #include "Game.h"
 #include "Board.h"
+#include "PGNReader.h"
 
 using namespace std;
 
@@ -16,33 +17,34 @@ namespace chess {
 
 
 Game::Game() {
-  board_states_.push_back(new Board());
+  initial_board_ = new Board;
 }
 
-void Game::Move(Movement * move) {
-  assert(move != nullptr);
+Game::Game(PGNReader & pgn) {
+  int current_move = 0;
+  Movement * move = nullptr;
+  Board * current_board = nullptr;
 
-  // clone existing board
-  board_states_.push_back(new Board(*(board_states_.back())));
-  Board & board = *(board_states_.back());
-  board.Move(move);
+  initial_board_ = new Board;
+  current_board = initial_board_;
+
+  while((move = pgn.GetMove(current_move))) {
+    // clone existing board, note also next, previous and
+    // alternative pointer are shallowed copied
+    Board * new_board = new Board(*current_board);
+    new_board->Move(move);
+    current_board->next = new_board;
+    new_board->previous = current_board;
+    new_board->next = nullptr;
+    new_board->alternative = nullptr;
+    current_board = current_board->next;
+    current_move++;
+  }
 }
 
 
-string Game::FEN() const {
-  return board_states_.back()->FEN();
-}
-
-string Game::GetLastMove() {
-  return board_states_.back()->GetMove();
-}
-
-bool Game::IsWhiteTurn() const {
-  return board_states_.back()->IsWhiteTurn();
-}
-
-void Game::Print(char (* printed_board)[64]) const {
-  board_states_.back()->Print(printed_board);
+Board * Game::InitialBoard() {
+  return initial_board_->next;
 }
 
 }

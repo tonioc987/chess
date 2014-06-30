@@ -9,7 +9,8 @@
 #include <errno.h>
 #include "ChessEngineInterface.h"
 #include "Game.h"
-#include "PGNReader.h"
+#include "Board.h"
+#include "UCIReader.h"
 
 using namespace std;
 
@@ -164,36 +165,28 @@ void ChessEngineInterface::WriteLine(string msg) {
   Write(msg.append("\n"));
 }
 
-void ChessEngineInterface::Analyze(Game & game, PGNReader & pgn, bool analyze_white, bool analyze_black,
+void ChessEngineInterface::FullAnalysis(Board * board, bool analyze_white, bool analyze_black,
     long time_per_move, long blunder_threshold) {
-  int current_move = 0;
-  Movement * move = nullptr;
-
-  while((move = pgn.GetMove(current_move))) {
-    string pre_FEN = game.FEN();
+  while(board != nullptr) {
     // game.Move() changes the state of IsWhiteTurn,
     // is_white_turn stores who is going to move next, then
     // game.Move() performs the move and switch to the next player
     // that's why is_white_turn is stored before making the move
-    bool is_white_turn = game.IsWhiteTurn();
+    bool is_white_turn = !board->IsWhiteTurn();
 
-    game.Move(move);
-    //cout << game.GetLastMove() << ",";
-    //cout << game.FEN() << ",";
-    //cout.flush();
     if((is_white_turn && analyze_white) ||
        (!is_white_turn && analyze_black)) {
-      auto engine_option = Analyze(pre_FEN, time_per_move);
-      auto player_option = Analyze(game.FEN(), time_per_move);
+      auto engine_option = Analyze(board->previous->FEN(), time_per_move);
+      auto player_option = Analyze(board->FEN(), time_per_move);
       auto diff = engine_option.first - player_option.first;
 
       if((is_white_turn && diff > blunder_threshold) ||
          (!is_white_turn && diff < -blunder_threshold)) {
-        //cout << player_option.first << "," << player_option.second << ",";
-        //cout << engine_option.first << "," << engine_option.second << ",";
+        board->centipawns = engine_option.first;
+        AddAlternative(board, engine_option.second);
       }
     }
-    //cout << endl;
+    board = board->next;
   }
 }
 
@@ -219,6 +212,38 @@ pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
     }
   }
   return make_pair(0,"");
+}
+
+
+void ChessEngineInterface::AddAlternative(Board * board, string alternative) {
+  UCIReader reader(alternative);
+  Movement * move = nullptr;
+  int current_move = 0;
+
+  // assume there is at least one movement in the alternative
+  move = reader.GetMove(current_move);
+  Board * current_board = new Board(*(board->previous));
+  current_board->Move(move);
+
+  // both share same parent, they are siblings
+  current_board->previous = board->previous;
+  current_board->next = nullptr;
+  current_board->alternative = nullptr;
+  board->alternative = current_board;
+
+  current_move++;
+  while((move = reader.GetMove(current_move))) {
+    // clone existing board, note also next, previous and
+    // alternative pointer are shallowed copied
+    Board * new_board = new Board(*current_board);
+    new_board->Move(move);
+    current_board->next = new_board;
+    new_board->previous = current_board;
+    new_board->next = nullptr;
+    new_board->alternative = nullptr;
+    current_board = current_board->next;
+    current_move++;
+  }
 }
 
 }
