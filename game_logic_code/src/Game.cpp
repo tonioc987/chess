@@ -6,6 +6,7 @@
  */
 
 #include <cassert>
+#include <vector>
 #include "Game.h"
 #include "Board.h"
 #include "PGNReader.h"
@@ -15,20 +16,16 @@ using namespace std;
 namespace acortes {
 namespace chess {
 
-
-Game::Game() {
-  initial_board_ = new Board;
-}
-
-Game::Game(PGNReader & pgn) {
-  int current_move = 0;
-  Movement * move = nullptr;
+Game::Game(string filename) {
   Board * current_board = nullptr;
+  vector<Movement *> moves;
+  PGNReader pgn;
+  pgn.GetMoves(filename, moves);
 
   initial_board_ = new Board;
   current_board = initial_board_;
 
-  while((move = pgn.GetMove(current_move))) {
+  for(auto & move : moves) {
     // clone existing board, note also next, previous and
     // alternative pointer are shallowed copied
     Board * new_board = new Board(*current_board);
@@ -38,7 +35,6 @@ Game::Game(PGNReader & pgn) {
     new_board->next = nullptr;
     new_board->alternative = nullptr;
     current_board = current_board->next;
-    current_move++;
   }
 }
 

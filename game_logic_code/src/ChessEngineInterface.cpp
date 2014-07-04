@@ -216,14 +216,16 @@ pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
 
 
 void ChessEngineInterface::AddAlternative(Board * board, string alternative) {
-  UCIReader reader(alternative);
-  Movement * move = nullptr;
-  int current_move = 0;
+  UCIReader reader;
+  vector<Movement *> moves;
+
+  reader.GetMoves(alternative, moves);
+  auto move = moves.begin();
+  auto end_move = moves.end();
 
   // assume there is at least one movement in the alternative
-  move = reader.GetMove(current_move);
   Board * current_board = new Board(*(board->previous));
-  current_board->Move(move);
+  current_board->Move(*move);
 
   // both share same parent, they are siblings
   current_board->previous = board->previous;
@@ -231,18 +233,16 @@ void ChessEngineInterface::AddAlternative(Board * board, string alternative) {
   current_board->alternative = nullptr;
   board->alternative = current_board;
 
-  current_move++;
-  while((move = reader.GetMove(current_move))) {
+  for(++move; move != end_move; ++move) {
     // clone existing board, note also next, previous and
     // alternative pointer are shallowed copied
     Board * new_board = new Board(*current_board);
-    new_board->Move(move);
+    new_board->Move(*move);
     current_board->next = new_board;
     new_board->previous = current_board;
     new_board->next = nullptr;
     new_board->alternative = nullptr;
     current_board = current_board->next;
-    current_move++;
   }
 }
 

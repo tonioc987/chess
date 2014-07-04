@@ -54,8 +54,7 @@ int GameAnalysis(int argc, char* argv[]) {
   tie(engine_path, pgnfile, analize_light, analize_dark, time_per_move, blunder_threshold) =
       ParseArguments(argc, argv);
 
-  PGNReader pgn(pgnfile);
-  Game game(pgn);
+  Game game(pgnfile);
 
   ChessEngineInterface engine(engine_path, false);
   engine.FullAnalysis(game.InitialBoard(), analize_light, analize_dark, time_per_move, blunder_threshold);

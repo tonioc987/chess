@@ -19,9 +19,7 @@ class PGNReader;
 
 class Game {
 public:
-  Game();
-  Game(PGNReader & pgh);
-  void Move(Movement * move);
+  Game(std::string filename);
   Board * InitialBoard();
 
 private:

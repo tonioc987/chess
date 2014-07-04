@@ -7,23 +7,18 @@
 #ifndef UCIREADER_H_
 #define UCIREADER_H_
 
-#include "Common.h"
-#include <vector>
+#include "ChessReader.h"
 
 namespace acortes {
 namespace chess {
 
-class Piece;
-struct Movement;
-
-class UCIReader {
+class UCIReader : ChessReader {
 public:
-  UCIReader(std::string moves);
-  ~UCIReader();
-  Movement* GetMove(unsigned int n) const;
+  UCIReader() {};
+  ~UCIReader() {};
+  void GetMoves(std::string moves_str, std::vector<Movement*> & moves);
 
-private:
-  std::vector<Movement *> moves_;
+protected:
   Movement* ParseMove(std::string move);
 };
 

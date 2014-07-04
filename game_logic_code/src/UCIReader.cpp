@@ -10,35 +10,13 @@
 #include "UCIReader.h"
 #include "Common.h"
 
+using namespace std;
 
 namespace acortes {
 namespace chess {
 
-UCIReader::UCIReader(std::string moves) {
-  std::string move;
 
-  for(unsigned int i = 0; i < moves.size(); ++i) {
-    // A move always start with a letter, so just skip
-    // spaces, move number and the dot
-    while(i < moves.size() &&
-           (isdigit(moves[i]) ||
-            isspace(moves[i]) ||
-            moves[i] == '.' ||
-            moves[i] == '-')) {
-      // for now ignore -, it is used at the end to indicate who won
-      i++;
-    }
-
-    if(i >= moves.size()) break;
-
-    move.clear();
-    while(i < moves.size() && !isspace(moves[i])) { move += moves[i]; i++; }
-    moves_.push_back(ParseMove(move));
-  }
-}
-
-
-Movement * UCIReader::ParseMove(std::string move) {
+Movement * UCIReader::ParseMove(string move) {
   // right now support just simple movements
   assert(move.size() == 4);
   assert(move[0] >= 'a' && move[0] <= 'h');
@@ -50,29 +28,6 @@ Movement * UCIReader::ParseMove(std::string move) {
 
   m->move = move;
 
-  // process castles first
-  /*if(move.compare("O-O") == 0) {
-    m->is_short_castle = true;
-    m->piece = PieceType::KING;
-    return m;
-  } else if (move.compare("O-O-O") == 0) {
-    m->is_long_castle = true;
-    m->piece = PieceType::KING;
-    return m;
-  }*/
-
-  // it is easier to parse backwards, since it easier to find and
-  // process the destination square.
-
-  // 1st process checks or check mate
-  /*if(move[i] == '+') {
-    m->is_check = true;
-    i--;
-  } else if(move[i] == '#') {
-    m->is_mate = true;
-    i--;
-  }*/
-
   // 2nd process source and destination file/rank
   m->source_file = GetFile(move[i]);
   i++;
@@ -83,38 +38,14 @@ Movement * UCIReader::ParseMove(std::string move) {
   m->dest_rank = GetRank(move[i]);
   i++;
 
-  // if it is a simple pawn movement, this entry will be used later
-  // otherwise continue processing the string
-  /*if(i > 0) {
-    i--;
-  }*/
-
-  // 4th capture
-  /*if(move[i] == 'x') {
-    m->is_capture = true;
-    i--;
-  }*/
-
-
   // TODO
   //m->is_promotion = false;
 
   return m;
 }
 
-Movement * UCIReader::GetMove(unsigned int n) const {
-  if(n < moves_.size()) {
-    return moves_[n];
-  } else {
-    return nullptr;
-  }
-}
-
-UCIReader::~UCIReader() {
-  for(auto & move : moves_) {
-    //delete move;
-    //move = nullptr;
-  }
+void UCIReader::GetMoves(string moves_str, vector<Movement*> & moves) {
+  ParseLine(moves_str, moves);
 }
 
 }

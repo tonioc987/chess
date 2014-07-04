@@ -10,54 +10,40 @@
 #include "PGNReader.h"
 #include "Common.h"
 
+using namespace std;
 
 namespace acortes {
 namespace chess {
 
-PGNReader::PGNReader(std::string filename) {
-  std::ifstream pgn_file(filename);
-  std::string line;
-  std::string move;
-  Color color = Color::WHITE;
+void PGNReader::GetMoves(string filename, vector<Movement*> & moves) {
+  ifstream pgn_file(filename);
+  string line;
+  string move;
 
   if(pgn_file.is_open()) {
     while(std::getline(pgn_file, line)) {
       // for now ignore all the information about the game
       if(line.size() > 0 && line[0] != '[') {
-        // not very robust assuming each line contains complete moves.
-        for(unsigned int i = 0; i < line.size(); ++i) {
-          // A move always start with a letter, so just skip
-          // spaces, move number and the dot
-          while(i < line.size() &&
-                 (isdigit(line[i]) ||
-                  isspace(line[i]) ||
-                  line[i] == '.' ||
-                  line[i] == '-')) {
-            // for now ignore -, it is used at the end to indicate who won
-            i++;
-          }
-
-          if(i >= line.size()) break;
-
-          move.clear();
-          while(i < line.size() && !isspace(line[i])) { move += line[i]; i++; }
-          moves_.push_back(ParseMove(move, color));
-          color = (color == Color::WHITE) ? Color::BLACK : Color::WHITE;
-        }
+        ParseLine(line, moves);
       }
     }
+  }
+
+  Color color = Color::WHITE;
+  for(auto & movement : moves) {
+    movement->color = color;
+    color = (color == Color::WHITE) ? Color::BLACK : Color::WHITE;
   }
 
   pgn_file.close();
 }
 
 
-Movement * PGNReader::ParseMove(std::string move, Color color) {
+Movement * PGNReader::ParseMove(std::string move) {
   Movement * m = new Movement;
   int i = move.size() - 1;
 
   m->move = move;
-  m->color = color;
 
   // process castles first
   if(move.compare("O-O") == 0) {
@@ -178,21 +164,6 @@ Movement * PGNReader::ParseMove(std::string move, Color color) {
   //m->is_promotion = false;
 
   return m;
-}
-
-Movement * PGNReader::GetMove(unsigned int n) const {
-  if(n < moves_.size()) {
-    return moves_[n];
-  } else {
-    return nullptr;
-  }
-}
-
-PGNReader::~PGNReader() {
-  for(auto & move : moves_) {
-    delete move;
-    move = nullptr;
-  }
 }
 
 }
