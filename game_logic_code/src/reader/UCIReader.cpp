@@ -8,7 +8,6 @@
 #include <fstream>
 #include <cassert>
 #include "UCIReader.h"
-#include "Common.h"
 
 using namespace std;
 

@@ -3,7 +3,6 @@
 #include <tuple>
 #include "Game.h"
 #include "Board.h"
-#include "PGNReader.h"
 #include "ChessEngineInterface.h"
 
 using namespace std;

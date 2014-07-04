@@ -8,7 +8,6 @@
 #include <fstream>
 #include <cassert>
 #include "PGNReader.h"
-#include "Common.h"
 
 using namespace std;
 

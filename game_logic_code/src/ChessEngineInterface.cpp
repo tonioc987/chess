@@ -10,7 +10,7 @@
 #include "ChessEngineInterface.h"
 #include "Game.h"
 #include "Board.h"
-#include "UCIReader.h"
+#include "reader/UCIReader.h"
 
 using namespace std;
 

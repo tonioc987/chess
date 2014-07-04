@@ -9,7 +9,7 @@
 #include <vector>
 #include "Game.h"
 #include "Board.h"
-#include "PGNReader.h"
+#include "reader/PGNReader.h"
 
 using namespace std;
 

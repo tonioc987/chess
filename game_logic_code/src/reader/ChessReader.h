@@ -7,7 +7,7 @@
 #ifndef CHESSREADER_H_
 #define CHESSREADER_H_
 
-#include "Common.h"
+#include "../Common.h"
 #include <vector>
 
 namespace acortes {
