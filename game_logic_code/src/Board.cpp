@@ -13,6 +13,8 @@
 #include "pieces/Pawn.h"
 #include "pieces/Queen.h"
 #include "pieces/Rook.h"
+#include "reader/PGNReader.h"
+#include "reader/UCIReader.h"
 
 using namespace std;
 
@@ -320,6 +322,54 @@ void Board::Print(char (* printed_board)[64]) const {
       c++;
     }
   }
+}
+
+
+void Board::AddMoves(Board * board, std::vector<Movement *> & moves) {
+  Board * current_board = board;
+
+  for(auto & move : moves) {
+    // clone existing board, note also next, previous and
+    // alternative pointer are shallowed copied
+    Board * new_board = new Board(*current_board);
+    new_board->Move(move);
+    current_board->next = new_board;
+    new_board->previous = current_board;
+    new_board->next = nullptr;
+    new_board->alternative = nullptr;
+    current_board = current_board->next;
+  }
+}
+
+
+Board * Board::CreateFromPGN(std::string pgnfile){
+  vector<Movement *> moves;
+  Board * board = new Board;
+  PGNReader pgn;
+  pgn.GetMoves(pgnfile, moves);
+  AddMoves(board, moves);
+  return board;
+}
+
+
+void Board::AddAlternative(Board * board, std::string alternative_str) {
+  vector<Movement *> moves;
+  UCIReader reader;
+  reader.GetMoves(alternative_str, moves);
+
+  // the root of the alternative is the parent of the current board.
+  // i.e. an alternative movement is in fact an alternative for
+  // the parent movement.
+  Board * parent = new Board(*(board->previous));
+
+  // Add moves to cloned parent and then merge the alternative
+  // with the original parent
+  // assume there is at least one movement in the alternative
+  AddMoves(parent, moves);
+  Board * alternative = parent->next;
+  alternative->previous = board->previous;
+  board->alternative = alternative;
+  delete parent;
 }
 
 }

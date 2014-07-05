@@ -46,7 +46,6 @@ private:
   void Write(std::string msg);
   void WriteLine(std::string msg);
   std::pair<long, std::string> Analyze(std::string fen, long time_secs);
-  void AddAlternative(Board * board, std::string alternative);
 };
 
 }

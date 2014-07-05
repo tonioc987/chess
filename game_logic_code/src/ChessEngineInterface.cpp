@@ -8,7 +8,6 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include "ChessEngineInterface.h"
-#include "Game.h"
 #include "Board.h"
 #include "reader/UCIReader.h"
 
@@ -109,6 +108,7 @@ size_t ChessEngineInterface::Read() {
   return readResult;
 }
 
+
 void ChessEngineInterface::ReadLines(vector<string> & lines) {
   while(size_t nbytes = Read()) {
     char * start = buffer_;
@@ -131,6 +131,7 @@ void ChessEngineInterface::ReadLines(vector<string> & lines) {
   }
 }
 
+
 std::string ChessEngineInterface::GetNextLine() {
   std::string line = "";
 
@@ -148,6 +149,7 @@ std::string ChessEngineInterface::GetNextLine() {
   return line;
 }
 
+
 void ChessEngineInterface::WaitForLine(string line_start) {
   string line;
 
@@ -157,13 +159,16 @@ void ChessEngineInterface::WaitForLine(string line_start) {
 
 }
 
+
 void ChessEngineInterface::Write(string msg) {
   write(parentToChild_[WRITE_FD], msg.c_str(), msg.size());
 }
 
+
 void ChessEngineInterface::WriteLine(string msg) {
   Write(msg.append("\n"));
 }
+
 
 void ChessEngineInterface::FullAnalysis(Board * board, bool analyze_white, bool analyze_black,
     long time_per_move, long blunder_threshold) {
@@ -183,12 +188,13 @@ void ChessEngineInterface::FullAnalysis(Board * board, bool analyze_white, bool 
       if((is_white_turn && diff > blunder_threshold) ||
          (!is_white_turn && diff < -blunder_threshold)) {
         board->centipawns = engine_option.first;
-        AddAlternative(board, engine_option.second);
+        Board::AddAlternative(board, engine_option.second);
       }
     }
     board = board->next;
   }
 }
+
 
 pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
   WriteLine("ucinewgame");
@@ -214,37 +220,6 @@ pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
   return make_pair(0,"");
 }
 
-
-void ChessEngineInterface::AddAlternative(Board * board, string alternative) {
-  UCIReader reader;
-  vector<Movement *> moves;
-
-  reader.GetMoves(alternative, moves);
-  auto move = moves.begin();
-  auto end_move = moves.end();
-
-  // assume there is at least one movement in the alternative
-  Board * current_board = new Board(*(board->previous));
-  current_board->Move(*move);
-
-  // both share same parent, they are siblings
-  current_board->previous = board->previous;
-  current_board->next = nullptr;
-  current_board->alternative = nullptr;
-  board->alternative = current_board;
-
-  for(++move; move != end_move; ++move) {
-    // clone existing board, note also next, previous and
-    // alternative pointer are shallowed copied
-    Board * new_board = new Board(*current_board);
-    new_board->Move(*move);
-    current_board->next = new_board;
-    new_board->previous = current_board;
-    new_board->next = nullptr;
-    new_board->alternative = nullptr;
-    current_board = current_board->next;
-  }
-}
 
 }
 }

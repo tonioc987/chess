@@ -1,7 +1,6 @@
 #include <ncurses.h>
 #include <getopt.h>
 #include <tuple>
-#include "Game.h"
 #include "Board.h"
 #include "ChessEngineInterface.h"
 
@@ -53,12 +52,11 @@ int GameAnalysis(int argc, char* argv[]) {
   tie(engine_path, pgnfile, analize_light, analize_dark, time_per_move, blunder_threshold) =
       ParseArguments(argc, argv);
 
-  Game game(pgnfile);
-
+  Board * initial_board = Board::CreateFromPGN(pgnfile);
   ChessEngineInterface engine(engine_path, false);
-  engine.FullAnalysis(game.InitialBoard(), analize_light, analize_dark, time_per_move, blunder_threshold);
+  engine.FullAnalysis(initial_board->next, analize_light, analize_dark, time_per_move, blunder_threshold);
 
-  Board * board = game.InitialBoard();
+  Board * board = initial_board;
 
   while(tmp != 'x') {
     clear();
@@ -71,7 +69,7 @@ int GameAnalysis(int argc, char* argv[]) {
     refresh();
     tmp = getch();
     if(tmp == KEY_LEFT) {
-      if(board != game.InitialBoard()) {
+      if(board != initial_board) {
         board = board->previous;
       }
     }

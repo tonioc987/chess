@@ -9,6 +9,7 @@
 #define BOARD_H
 
 #include <map>
+#include <vector>
 #include "Common.h"
 
 namespace acortes {
@@ -25,6 +26,10 @@ public:
   bool IsWhiteTurn() const { return is_white_turn_; }
   std::string GetMove() const { return movement_->move; }
   void Print(char (* printed_board)[64]) const;
+
+  static void AddMoves(Board * board, std::vector<Movement *> & moves);
+  static Board * CreateFromPGN(std::string pgnfile);
+  static void AddAlternative(Board * board, std::string alternative_str);
 
 private:
   uint8_t board_[8][8];
