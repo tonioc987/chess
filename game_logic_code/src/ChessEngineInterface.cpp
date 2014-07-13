@@ -172,26 +172,48 @@ void ChessEngineInterface::WriteLine(string msg) {
 
 void ChessEngineInterface::FullAnalysis(Board * board, bool analyze_white, bool analyze_black,
     long time_per_move, long blunder_threshold) {
+
+  string alternative_str = "";
+
   while(board != nullptr) {
-    // game.Move() changes the state of IsWhiteTurn,
-    // is_white_turn stores who is going to move next, then
-    // game.Move() performs the move and switch to the next player
-    // that's why is_white_turn is stored before making the move
-    bool is_white_turn = !board->IsWhiteTurn();
+    // IsWhiteTurn stores who is going to move next
+    // true => black just moved
+    //      => white to move
+    //      => engine evaluation from white perspective
+    //      => can evaluate black movement
+    // false => white just moved
+    //       => black to move
+    //       => engine evaluation from black perspective
+    //       => can evaluate white movement
+    bool white_to_move = board->IsWhiteTurn();
 
-    if((is_white_turn && analyze_white) ||
-       (!is_white_turn && analyze_black)) {
-      auto engine_option = Analyze(board->previous->FEN(), time_per_move);
-      auto player_option = Analyze(board->FEN(), time_per_move);
-      auto diff = engine_option.first - player_option.first;
+    // for current move, evaluation of best reply
+    auto analysis = Analyze(board->FEN(), time_per_move);
 
-      if((is_white_turn && diff > blunder_threshold) ||
-         (!is_white_turn && diff < -blunder_threshold)) {
-        board->centipawns = engine_option.first;
-        Board::AddAlternative(board, engine_option.second);
+    // engine evaluations are always from its viewpoint
+    // normalize them to + white advantage, - black advantage
+    // just need to inverse black evaluations
+    if(!white_to_move) {
+      analysis.first *= -1;
+    }
+
+    board->centipawns = analysis.first;
+
+    if( board->previous &&
+        ((!white_to_move && analyze_white) ||
+         (white_to_move && analyze_black))) {
+      auto diff = board->previous->centipawns - board->centipawns;
+
+      if((!white_to_move && diff > blunder_threshold) ||
+         (white_to_move && diff < -blunder_threshold)) {
+        Board::AddAlternative(board, alternative_str);
+        if(board->alternative) {
+          board->alternative->centipawns = board->previous->centipawns;
+        }
       }
     }
     board = board->next;
+    alternative_str = analysis.second;
   }
 }
 

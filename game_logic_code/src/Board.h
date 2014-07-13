@@ -25,6 +25,7 @@ public:
   void Move(Movement * move);
   bool IsWhiteTurn() const { return is_white_turn_; }
   std::string GetMove() const { return movement_->move; }
+  Movement * GetMovement() const { return movement_; }
   void Print(char (* printed_board)[64]) const;
 
   static void AddMoves(Board * board, std::vector<Movement *> & moves);
@@ -54,6 +55,7 @@ public:
   Board * next;
   Board * previous;
   Board * alternative;
+  Board * original;
 };
 
 }

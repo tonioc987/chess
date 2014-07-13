@@ -63,7 +63,7 @@ Board::Board() {
   board_[7][6] = Color::BLACK | PieceType::KNIGHT;
   board_[7][7] = Color::BLACK | PieceType::ROOK;
 
-  movement_ = nullptr;
+  movement_ = new Movement;
   is_white_turn_ = true;
   move_number_ = 0;
   halfmove_clock_ = 0;
@@ -79,12 +79,13 @@ Board::Board() {
   next = nullptr;
   previous = nullptr;
   alternative = nullptr;
+  original = nullptr;
 }
 
 
 void Board::Move(Movement * move) {
-  // if the movement is from UCI notation, then it has the source square
-  // but no piece type, just copy the piece type
+  // if the movement is from UCI notation, then it has just source square
+  // add other data like: piece type, color, capture, castle.
   if(move->source_file != -1 && move->source_rank != -1 &&
       PieceType::EMPTY == move->piece) {
     move->piece = GetPiece(board_[move->source_rank][move->source_file]);
@@ -96,6 +97,13 @@ void Board::Move(Movement * move) {
       } else if (move->dest_file == 2) {
         move->is_long_castle = true;
       }
+    }
+
+    if((PieceType::EMPTY != GetPiece(board_[move->dest_rank][move->dest_file])) ||
+       ( (PieceType::PAWN == move->piece) &&
+         (en_passant_file_ == move->dest_file) &&
+         (en_passant_capture_rank_ == move->dest_rank) ) ) {
+      move->is_capture = true;
     }
   }
 
@@ -232,7 +240,9 @@ bool Board::FindPiece(Movement * move) {
   }
 
   // Piece found
-  assert(found);
+  if(!found) {
+    assert(found);
+  }
   return found;
 }
 
@@ -337,6 +347,7 @@ void Board::AddMoves(Board * board, std::vector<Movement *> & moves) {
     new_board->previous = current_board;
     new_board->next = nullptr;
     new_board->alternative = nullptr;
+    new_board->original = nullptr;
     current_board = current_board->next;
   }
 }
@@ -357,19 +368,31 @@ void Board::AddAlternative(Board * board, std::string alternative_str) {
   UCIReader reader;
   reader.GetMoves(alternative_str, moves);
 
-  // the root of the alternative is the parent of the current board.
-  // i.e. an alternative movement is in fact an alternative for
-  // the parent movement.
-  Board * parent = new Board(*(board->previous));
+  Movement * original_move = board->GetMovement();
+  Movement * alternative_move = moves[0];
 
-  // Add moves to cloned parent and then merge the alternative
-  // with the original parent
-  // assume there is at least one movement in the alternative
-  AddMoves(parent, moves);
-  Board * alternative = parent->next;
-  alternative->previous = board->previous;
-  board->alternative = alternative;
-  delete parent;
+  // just add real alternatives, sometimes the chess engine suggests
+  // the same move that was made
+  if(original_move->source_file != alternative_move->source_file ||
+      original_move->source_rank != alternative_move->source_rank ||
+      original_move->dest_file != alternative_move->dest_file ||
+      original_move->dest_rank != alternative_move->dest_rank) {
+    // the root of the alternative is the parent of the current board
+    // the cloned parent is just used to create the alternative branch
+    // when the branch is merged, this parent is no longer needed and
+    // it is deleted
+    Board * cloned_parent = new Board(*(board->previous));
+
+    // Add moves to cloned parent and then merge the alternative
+    // with the original parent
+    // assume there is at least one movement in the alternative
+    AddMoves(cloned_parent, moves);
+    Board * alternative = cloned_parent->next;
+    alternative->original = board;
+    alternative->previous = board->previous;
+    board->alternative = alternative;
+    delete cloned_parent;
+  }
 }
 
 }

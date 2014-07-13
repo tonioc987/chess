@@ -7,6 +7,18 @@
 using namespace std;
 using namespace acortes::chess;
 
+// Looks like color index 0 of ncurses is reserved or at least cannot be
+// configured. That's why the LSBit of this constants is set to 1
+// bit 0 always set to 1
+// bit 1 is used to select piece color
+// bit 2 is used to select square color
+#define NCURSES_COLOR_LSB 0x01
+#define NCURSES_WHITE_PIECE (0x00 | NCURSES_COLOR_LSB)
+#define NCURSES_BLACK_PIECE (0x02 | NCURSES_COLOR_LSB)
+#define NCURSES_WHITE_SQUARE (0x00 | NCURSES_COLOR_LSB)
+#define NCURSES_BLACK_SQUARE (0x04 | NCURSES_COLOR_LSB)
+
+
 tuple<string, string,bool,bool,long,long> ParseArguments(int argc, char* argv[]);
 string PrintUsage();
 
@@ -14,6 +26,8 @@ void PrintFEN(string FEN) {
   char space = ' ';
   char new_line = '\n';
   int num_spaces = 0;
+  int color = 0;
+  bool isWhiteSquare = true;
 
   for(char & c : FEN) {
     if(c == ' ') {
@@ -21,21 +35,27 @@ void PrintFEN(string FEN) {
     }
     else if(c == '/') {
       addch(new_line);
+      isWhiteSquare = !isWhiteSquare;
+      continue;
     }
-    else if(c > '0' && c <= '9') {
+
+    if(c > '0' && c <= '9') {
       num_spaces = c - '0';
       for(int i = 0; i < num_spaces; ++i) {
-        addch('.' | A_BOLD | COLOR_PAIR(3));
-        addch(space);
+        color = isWhiteSquare ? NCURSES_WHITE_SQUARE : NCURSES_BLACK_SQUARE;
+        addch(space | COLOR_PAIR(color));
+        addch(space | COLOR_PAIR(color));
+        addch(space | COLOR_PAIR(color));
+        isWhiteSquare = !isWhiteSquare;
       }
     }
-    else if(isupper(c)) {
-      addch(c | A_BOLD | COLOR_PAIR(1));
-      addch(space);
-    }
     else {
-      addch(c | A_BOLD | COLOR_PAIR(2));
-      addch(space);
+      color = isWhiteSquare ? NCURSES_WHITE_SQUARE : NCURSES_BLACK_SQUARE;
+      color |= isupper(c) ? NCURSES_WHITE_PIECE : NCURSES_BLACK_PIECE;
+      addch(space | COLOR_PAIR(color));
+      addch(c | A_BOLD | COLOR_PAIR(color));
+      addch(space | COLOR_PAIR(color));
+      isWhiteSquare = !isWhiteSquare;
     }
   }
 }
@@ -54,35 +74,55 @@ int GameAnalysis(int argc, char* argv[]) {
 
   Board * initial_board = Board::CreateFromPGN(pgnfile);
   ChessEngineInterface engine(engine_path, false);
-  engine.FullAnalysis(initial_board->next, analize_light, analize_dark, time_per_move, blunder_threshold);
+  clear();
+  engine.FullAnalysis(initial_board, analize_light, analize_dark, time_per_move, blunder_threshold);
 
   Board * board = initial_board;
 
   while(tmp != 'x') {
     clear();
     PrintFEN(board->FEN().c_str());
-    string alternative = "";
+    printw("\n\n%s", board->FEN().c_str());
+    printw("\n\nMove(%ld): %s", board->centipawns, board->GetMove().c_str());
+
+    if(board->original) {
+      printw("\n\nOriginal(%ld): %s", board->original->centipawns, board->original->GetMove().c_str());
+    }
+
     if(board->alternative) {
-      alternative = board->alternative->GetMove();
+      printw("\n\nAlternative(%ld): %s", board->alternative->centipawns, board->alternative->GetMove().c_str());
     }
-    printw("\n%ld: %s", board->centipawns, alternative.c_str());
+
+    printw("\n\n");
     refresh();
+
     tmp = getch();
-    if(tmp == KEY_LEFT) {
-      if(board != initial_board) {
-        board = board->previous;
-      }
+    if(tmp == KEY_UP && board->previous) {
+      board = board->previous;
     }
-    else if (tmp == KEY_RIGHT) {
-      if(board->next != nullptr) {
-        board = board->next;
+    else if(tmp == KEY_DOWN && board->next) {
+      board = board->next;
+    }
+    else if(tmp == KEY_RIGHT && board->alternative) {
+      board = board->alternative;
+    }
+    else if(tmp == KEY_LEFT && board->original) {
+      board = board->original;
+    }
+    else if(tmp == KEY_PPAGE) {
+      // find start of alternative or start of game
+      while(board->previous) {
+        if(board->original) {
+          board = board->original;
+          break;
+        }
+        board = board->previous;
       }
     }
   }
 
   return 0;
 }
-
 
 int main(int argc, char* argv[]) {
   // ncurses initialization
@@ -91,9 +131,10 @@ int main(int argc, char* argv[]) {
   noecho();
   keypad(stdscr, TRUE);
   start_color();
-  init_pair(1, COLOR_YELLOW, COLOR_BLACK);
-  init_pair(2, COLOR_CYAN, COLOR_BLACK);
-  init_pair(3, COLOR_WHITE, COLOR_BLACK);
+  init_pair(NCURSES_WHITE_PIECE | NCURSES_WHITE_SQUARE, COLOR_YELLOW, COLOR_RED);
+  init_pair(NCURSES_WHITE_PIECE | NCURSES_BLACK_SQUARE, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(NCURSES_BLACK_PIECE | NCURSES_WHITE_SQUARE, COLOR_CYAN, COLOR_RED);
+  init_pair(NCURSES_BLACK_PIECE | NCURSES_BLACK_SQUARE, COLOR_CYAN, COLOR_BLACK);
 
   GameAnalysis(argc, argv);
 
