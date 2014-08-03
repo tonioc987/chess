@@ -14,14 +14,13 @@ namespace chess {
 
 class Rook {
 public:
-  static bool IsValidMove(uint8_t (&board)[8][8], int file, int rank, Movement & move){
+  static bool IsValidMove(char (&board)[8][8], int file, int rank, Movement & move){
     int file_movement = abs(file - move.dest_file);
     int rank_movement = abs(rank - move.dest_rank);
 
     assert(move.dest_rank >= 0 && move.dest_rank < 8);
     assert(move.dest_file >= 0 && move.dest_file < 8);
     assert(move.piece == board[rank][file]);
-    assert(move.color == board[rank][file]);
     assert(file != -1);
     assert(rank != -1);
 
@@ -34,7 +33,7 @@ public:
       int start_rank = (rank < move.dest_rank) ? rank + 1 : move.dest_rank + 1;
       int end_rank = (rank < move.dest_rank) ? move.dest_rank : rank;
       for(int r = start_rank; r < end_rank; r++) {
-        if(PieceType::EMPTY != board[r][file]) {
+        if(!IsEmpty(board[r][file])) {
           return false;
         }
       }
@@ -45,7 +44,7 @@ public:
       int start_file = (file < move.dest_file) ? file + 1 : move.dest_file + 1;
       int end_file = (file < move.dest_file) ? move.dest_file : file;
       for(int f = start_file; f < end_file; f++) {
-        if(PieceType::EMPTY != board[rank][f]) {
+        if(!IsEmpty(board[rank][f])) {
           return false;
         }
       }

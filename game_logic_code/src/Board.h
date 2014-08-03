@@ -15,8 +15,8 @@
 namespace acortes {
 namespace chess {
 
-typedef  bool (*IsValidFunction)(uint8_t (&board)[8][8], int file, int rank, Movement & movement);
-typedef std::map<PieceType, IsValidFunction> IsValidMap;
+typedef  bool (*IsValidFunction)(char (&board)[8][8], int file, int rank, Movement & movement);
+typedef std::map<char, IsValidFunction> IsValidMap;
 
 class Board {
 public:
@@ -33,7 +33,7 @@ public:
   static void AddAlternative(Board * board, std::string alternative_str);
 
 private:
-  uint8_t board_[8][8];
+  char board_[8][8];
   Movement * movement_;
   bool is_white_turn_;
   int move_number_;

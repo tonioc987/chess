@@ -14,14 +14,13 @@ namespace chess {
 
 class Knight {
 public:
-  static bool IsValidMove(uint8_t (&board)[8][8], int file, int rank, Movement & move){
+  static bool IsValidMove(char (&board)[8][8], int file, int rank, Movement & move){
     int file_movement = abs(file - move.dest_file);
     int rank_movement = abs(rank - move.dest_rank);
 
     assert(move.dest_rank >= 0 && move.dest_rank < 8);
     assert(move.dest_file >= 0 && move.dest_file < 8);
     assert(move.piece == board[rank][file]);
-    assert(move.color == board[rank][file]);
     assert(file != -1);
     assert(rank != -1);
 

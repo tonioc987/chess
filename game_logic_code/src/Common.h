@@ -13,57 +13,22 @@
 namespace acortes {
 namespace chess {
 
-enum class Color : uint8_t{
-  WHITE = 0x00,
-  BLACK = 0x80
-};
+#define KING 'K'
+#define QUEEN 'Q'
+#define BISHOP 'B'
+#define KNIGHT 'N'
+#define ROOK 'R'
+#define PAWN 'P'
+#define EMPTY '.'
 
-enum class PieceType : uint8_t{
-  KING = 'K',
-  QUEEN = 'Q',
-  BISHOP = 'B',
-  KNIGHT = 'N',
-  ROOK = 'R',
-  PAWN = 'P',
-  EMPTY = 0
-};
 
-inline bool operator ==(PieceType p, uint8_t c) {
-  return static_cast<uint8_t>(p) == (0x7F & c);
-}
+bool inline AreSimilarPieces(char piece1, char piece2) { return (toupper(piece1) == toupper(piece2)); }
+bool inline IsEmpty(char piece) { return ('.' == piece); }
 
-inline bool operator !=(PieceType p, uint8_t c) {
-  return static_cast<uint8_t>(p) != (0x7F & c);
-}
-
-inline bool operator ==(Color c, uint8_t p) {
-  return static_cast<uint8_t>(c) == (0x80 & p);
-}
-
-inline bool operator !=(Color c, uint8_t p) {
-  return static_cast<uint8_t>(c) != (0x80 & p);
-}
-
-inline std::string piece_to_string(uint8_t p) {
-  char c = static_cast<char>(p & 0x7F);
-  if(p & 0x80) {
-    c = tolower(c);
-  }
-  return std::string(1,c);
-}
-
-inline uint8_t operator |(Color c, PieceType p) {
-  return (static_cast<uint8_t>(c)) + (static_cast<uint8_t>(p));
-}
-
-inline PieceType GetPiece(uint8_t p) {
-  return static_cast<PieceType>(0x7F & p);
-}
-
-inline Color GetColor(uint8_t p) {
-  return static_cast<Color>(0x80 & p);
-}
-
+char inline White(char piece) { return (toupper(piece)); }
+char inline Black(char piece) { return (tolower(piece)); }
+bool inline IsWhite(char piece) { return (isupper(piece)); }
+bool inline IsBlack(char piece) { return (islower(piece)); }
 
 struct Movement {
   int source_file;
@@ -77,10 +42,9 @@ struct Movement {
   bool is_check;
   bool is_mate;
   bool is_promotion;
-  PieceType promoted_piece;
+  char promoted_piece;
   std::string move;
-  PieceType piece;
-  Color color;
+  char piece;
 
   Movement() {
     source_file = -1;
@@ -94,10 +58,9 @@ struct Movement {
     is_check = false;
     is_mate = false;
     is_promotion = false;
-    promoted_piece = PieceType::EMPTY;
+    promoted_piece = EMPTY;
     move = "";
-    piece = PieceType::EMPTY;
-    color = Color::WHITE;
+    piece = EMPTY;
   }
 };
 

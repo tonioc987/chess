@@ -14,8 +14,8 @@ namespace chess {
 
 class Pawn {
 public:
-  static bool IsValidMove(uint8_t (&board)[8][8], int file, int rank, Movement & move){
-    bool is_white = (Color::WHITE == board[rank][file]);
+  static bool IsValidMove(char (&board)[8][8], int file, int rank, Movement & move){
+    bool is_white = IsWhite(board[rank][file]);
     const int rank_initial = (is_white) ? 1 : 6 ;
     const int rank_one_step = (is_white) ? rank+1 : rank-1 ;
     const int rank_two_steps = (is_white) ? rank+2 : rank-2 ;
@@ -23,7 +23,6 @@ public:
     assert(move.dest_rank >= 0 && move.dest_rank < 8);
     assert(move.dest_file >= 0 && move.dest_file < 8);
     assert(move.piece == board[rank][file]);
-    assert(move.color == board[rank][file]);
     assert(file != -1);
     assert(rank != -1);
 
@@ -31,10 +30,10 @@ public:
     // when they are in the starting position, they can move two squares
     // No pieces should be in front of the pawn
     if (move.dest_file == file &&
-        PieceType::EMPTY == board[rank_one_step][file] &&
+        IsEmpty(board[rank_one_step][file]) &&
         ( (move.dest_rank == rank_one_step) ||
           (rank == rank_initial && move.dest_rank == rank_two_steps &&
-              PieceType::EMPTY == board[rank_two_steps][file] ) ) ) {
+              IsEmpty(board[rank_two_steps][file]) ) ) ) {
       return true;
     }
 

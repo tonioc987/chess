@@ -22,46 +22,53 @@ namespace acortes {
 namespace chess {
 
 const IsValidMap Board::is_valid_move_ = {
-    { PieceType::KING, King::IsValidMove },
-    { PieceType::QUEEN, Queen::IsValidMove },
-    { PieceType::BISHOP, Bishop::IsValidMove },
-    { PieceType::KNIGHT, Knight::IsValidMove },
-    { PieceType::ROOK, Rook::IsValidMove },
-    { PieceType::PAWN, Pawn::IsValidMove }
+    { White(KING), King::IsValidMove },
+    { White(QUEEN), Queen::IsValidMove },
+    { White(BISHOP), Bishop::IsValidMove },
+    { White(KNIGHT), Knight::IsValidMove },
+    { White(ROOK), Rook::IsValidMove },
+    { White(PAWN), Pawn::IsValidMove },
+
+    { Black(KING), King::IsValidMove },
+    { Black(QUEEN), Queen::IsValidMove },
+    { Black(BISHOP), Bishop::IsValidMove },
+    { Black(KNIGHT), Knight::IsValidMove },
+    { Black(ROOK), Rook::IsValidMove },
+    { Black(PAWN), Pawn::IsValidMove }
 };
 
 Board::Board() {
-  board_[0][0] = Color::WHITE | PieceType::ROOK;
-  board_[0][1] = Color::WHITE | PieceType::KNIGHT;
-  board_[0][2] = Color::WHITE | PieceType::BISHOP;
-  board_[0][3] = Color::WHITE | PieceType::QUEEN;
-  board_[0][4] = Color::WHITE | PieceType::KING;
-  board_[0][5] = Color::WHITE | PieceType::BISHOP;
-  board_[0][6] = Color::WHITE | PieceType::KNIGHT;
-  board_[0][7] = Color::WHITE | PieceType::ROOK;
+  board_[0][0] = White(ROOK);
+  board_[0][1] = White(KNIGHT);
+  board_[0][2] = White(BISHOP);
+  board_[0][3] = White(QUEEN);
+  board_[0][4] = White(KING);
+  board_[0][5] = White(BISHOP);
+  board_[0][6] = White(KNIGHT);
+  board_[0][7] = White(ROOK);
 
   for(int i = 0; i < 8; ++i) {
-    board_[1][i] = Color::WHITE | PieceType::PAWN;
+    board_[1][i] = White(PAWN);
   }
 
   for(int k = 2; k < 6; ++k) {
     for(int i = 0; i < 8; ++i) {
-      board_[k][i] = static_cast<uint8_t>(PieceType::EMPTY);
+      board_[k][i] = EMPTY;
     }
   }
 
   for(int i = 0; i < 8; ++i) {
-    board_[6][i] = Color::BLACK | PieceType::PAWN;
+    board_[6][i] = Black(PAWN);
   }
 
-  board_[7][0] = Color::BLACK | PieceType::ROOK;
-  board_[7][1] = Color::BLACK | PieceType::KNIGHT;
-  board_[7][2] = Color::BLACK | PieceType::BISHOP;
-  board_[7][3] = Color::BLACK | PieceType::QUEEN;
-  board_[7][4] = Color::BLACK | PieceType::KING;
-  board_[7][5] = Color::BLACK | PieceType::BISHOP;
-  board_[7][6] = Color::BLACK | PieceType::KNIGHT;
-  board_[7][7] = Color::BLACK | PieceType::ROOK;
+  board_[7][0] = Black(ROOK);
+  board_[7][1] = Black(KNIGHT);
+  board_[7][2] = Black(BISHOP);
+  board_[7][3] = Black(QUEEN);
+  board_[7][4] = Black(KING);
+  board_[7][5] = Black(BISHOP);
+  board_[7][6] = Black(KNIGHT);
+  board_[7][7] = Black(ROOK);
 
   movement_ = new Movement;
   is_white_turn_ = true;
@@ -87,11 +94,10 @@ void Board::Move(Movement * move) {
   // if the movement is from UCI notation, then it has just source square
   // add other data like: piece type, color, capture, castle.
   if(move->source_file != -1 && move->source_rank != -1 &&
-      PieceType::EMPTY == move->piece) {
-    move->piece = GetPiece(board_[move->source_rank][move->source_file]);
-    move->color = GetColor(board_[move->source_rank][move->source_file]);
+      IsEmpty(move->piece)) {
+    move->piece = board_[move->source_rank][move->source_file];
 
-    if(PieceType::KING == move->piece && move->source_file == 4) {
+    if(AreSimilarPieces(move->piece, KING) && move->source_file == 4) {
       if(move->dest_file == 6) {
         move->is_short_castle = true;
       } else if (move->dest_file == 2) {
@@ -99,8 +105,8 @@ void Board::Move(Movement * move) {
       }
     }
 
-    if((PieceType::EMPTY != GetPiece(board_[move->dest_rank][move->dest_file])) ||
-       ( (PieceType::PAWN == move->piece) &&
+    if((!IsEmpty(board_[move->dest_rank][move->dest_file])) ||
+       ( (AreSimilarPieces(move->piece, PAWN)) &&
          (en_passant_file_ == move->dest_file) &&
          (en_passant_capture_rank_ == move->dest_rank) ) ) {
       move->is_capture = true;
@@ -112,68 +118,63 @@ void Board::Move(Movement * move) {
       // move king
       board_[move->source_rank][move->source_file+2] =
           board_[move->source_rank][move->source_file];
-      board_[move->source_rank][move->source_file] =
-          static_cast<uint8_t>(PieceType::EMPTY);
+      board_[move->source_rank][move->source_file] = EMPTY;
       // move rook
       board_[move->source_rank][move->source_file+2-1] =
           board_[move->source_rank][move->source_file+3];
-      board_[move->source_rank][move->source_file+3] =
-          static_cast<uint8_t>(PieceType::EMPTY);
+      board_[move->source_rank][move->source_file+3] = EMPTY;
     } else if(move->is_long_castle) {
       board_[move->source_rank][move->source_file-2] =
           board_[move->source_rank][move->source_file];
-      board_[move->source_rank][move->source_file] =
-          static_cast<uint8_t>(PieceType::EMPTY);
+      board_[move->source_rank][move->source_file] = EMPTY;
       // move rook
       board_[move->source_rank][move->source_file-2+1] =
           board_[move->source_rank][move->source_file-4];
-      board_[move->source_rank][move->source_file-4] =
-          static_cast<uint8_t>(PieceType::EMPTY);
+      board_[move->source_rank][move->source_file-4] = EMPTY;
     } else {
       if(move->is_capture) {
-        if((PieceType::PAWN == move->piece) &&
+        if(AreSimilarPieces(move->piece, PAWN) &&
             (en_passant_file_ == move->dest_file) &&
             (en_passant_capture_rank_ == move->dest_rank)) {
           // simulate moving the pawn one square back, anyway it will be overwritten below
           board_[move->dest_rank][move->dest_file] =
               board_[en_passant_rank_][en_passant_file_];
-          board_[en_passant_rank_][en_passant_file_] =
-              static_cast<uint8_t>(PieceType::EMPTY);
+          board_[en_passant_rank_][en_passant_file_] = EMPTY;
         }
 
         // validate pieces of opposite color
-        assert((Color::WHITE == board_[move->source_rank][move->source_file]) ^
-               (Color::WHITE == board_[move->dest_rank][move->dest_file]));
+        assert(IsWhite(board_[move->source_rank][move->source_file]) ^
+               IsWhite(board_[move->dest_rank][move->dest_file]));
       }
       board_[move->dest_rank][move->dest_file] = board_[move->source_rank][move->source_file];
-      board_[move->source_rank][move->source_file] = static_cast<uint8_t>(PieceType::EMPTY);
+      board_[move->source_rank][move->source_file] = EMPTY;
     }
   } else {
     assert(false);
   }
 
   // Update castle availability
-  if(PieceType::KING == move->piece) {
-    if(Color::WHITE == move->color) {
+  if(AreSimilarPieces(move->piece, KING)) {
+    if(IsWhite(move->piece)) {
       white_short_castle_ = false;
       white_long_castle_ = false;
     } else {
       black_short_castle_ = false;
       black_long_castle_ = false;
     }
-  } else if(PieceType::ROOK == move->piece) {
+  } else if(AreSimilarPieces(move->piece, ROOK)) {
     // testing just the source file is a weak test, but it is enough to
     // determine that castle has been lost. Ideally, this variables should be
     // set to false just once, but there is no side effect in setting them
     // to false multiple times.
     if(move->source_file == 0) {
-      if(Color::WHITE == move->color) {
+      if(IsWhite(move->piece)) {
         white_long_castle_ = false;
       } else {
         black_long_castle_ = false;
       }
     } else if(move->source_file == 7) {
-      if(Color::WHITE == move->color) {
+      if(IsWhite(move->piece)) {
         white_short_castle_ = false;
       } else {
         black_short_castle_ = false;
@@ -183,14 +184,14 @@ void Board::Move(Movement * move) {
 
   movement_ = move;
   is_white_turn_ = !is_white_turn_;
-  if(move->is_capture || (PieceType::PAWN == move->piece)) {
+  if(move->is_capture || AreSimilarPieces(move->piece, PAWN)) {
     halfmove_clock_ = 0;
   } else {
     halfmove_clock_++;
   }
 
   // store en passant candidate
-  if((PieceType::PAWN == move->piece) &&
+  if(AreSimilarPieces(move->piece, PAWN) &&
      (abs(move->dest_rank - move->source_rank) == 2)) {
     en_passant_file_ = move->dest_file;
     en_passant_rank_ = move->dest_rank;
@@ -221,7 +222,6 @@ bool Board::FindPiece(Movement * move) {
       // if can reach square, then filter by source square in case
       // the information exists
       if( move->piece == board_[rank][file] &&
-          move->color == board_[rank][file] &&
           valid(board_, file, rank, *move) &&
           (move->source_file == -1 || file == move->source_file) &&
           (move->source_rank == -1 || rank == move->source_rank)) {
@@ -253,14 +253,14 @@ string Board::FEN() const {
   std::string fen;
   for(auto rank = 7; rank != -1; --rank) {
     for(auto file = 0; file != 8; ++file) {
-      if(PieceType::EMPTY == board_[rank][file]) {
+      if(IsEmpty(board_[rank][file])) {
         ++empty_spaces;
       } else {
         if(empty_spaces) {
           fen.append(std::to_string(empty_spaces));
           empty_spaces = 0;
         }
-        fen.append(piece_to_string(board_[rank][file]));
+        fen.push_back(board_[rank][file]);
       }
     } // end of a rank
 
@@ -324,10 +324,10 @@ void Board::Print(char (* printed_board)[64]) const {
 
   for(auto rank = 8; rank != 0; --rank) {
     for(auto file = 0; file != 8; ++file) {
-      if(PieceType::EMPTY == board_[rank][file]) {
+      if(IsEmpty(board_[rank][file])) {
         *c = space;
       } else {
-        *c = piece_to_string(board_[rank][file]).c_str()[0];
+        *c = board_[rank][file];
       }
       c++;
     }

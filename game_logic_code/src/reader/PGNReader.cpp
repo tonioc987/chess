@@ -28,10 +28,12 @@ void PGNReader::GetMoves(string filename, vector<Movement*> & moves) {
     }
   }
 
-  Color color = Color::WHITE;
+  bool isWhite = true;
   for(auto & movement : moves) {
-    movement->color = color;
-    color = (color == Color::WHITE) ? Color::BLACK : Color::WHITE;
+    if(!isWhite) {
+      movement->piece = Black(movement->piece);
+    }
+    isWhite = !isWhite;
   }
 
   pgn_file.close();
@@ -47,11 +49,11 @@ Movement * PGNReader::ParseMove(std::string move) {
   // process castles first
   if(move.compare("O-O") == 0) {
     m->is_short_castle = true;
-    m->piece = PieceType::KING;
+    m->piece = KING;
     return m;
   } else if (move.compare("O-O-O") == 0) {
     m->is_long_castle = true;
-    m->piece = PieceType::KING;
+    m->piece = KING;
     return m;
   }
 
@@ -122,23 +124,23 @@ Movement * PGNReader::ParseMove(std::string move) {
   assert(i==0);
   switch(move[i]) {
     case 'R': {
-      m->piece = PieceType::ROOK;
+      m->piece = ROOK;
       break;
     }
     case 'B': {
-      m->piece = PieceType::BISHOP;
+      m->piece = BISHOP;
       break;
     }
     case 'N': {
-      m->piece = PieceType::KNIGHT;
+      m->piece = KNIGHT;
       break;
     }
     case 'Q': {
-      m->piece = PieceType::QUEEN;
+      m->piece = QUEEN;
       break;
     }
     case 'K': {
-      m->piece = PieceType::KING;
+      m->piece = KING;
       break;
     }
     case 'a':
@@ -149,7 +151,7 @@ Movement * PGNReader::ParseMove(std::string move) {
     case 'f':
     case 'g':
     case 'h': {
-      m->piece = PieceType::PAWN;
+      m->piece = PAWN;
       break;
     }
     default: {

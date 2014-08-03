@@ -4,8 +4,8 @@
  *  See LICENSE file in the root of this project
  */
 #include "gtest/gtest.h"
-#include "Game.h"
-#include "PGNReader.h"
+#include "Board.h"
+#include "reader/PGNReader.h"
 #include <utility>
 #include <iostream>
 #include <fstream>
@@ -19,12 +19,7 @@ protected:
   }
 
   virtual void TearDown() {
-    delete game_;
-    delete pgn_;
   }
-
-  PGNReader * pgn_;
-  Game * game_;
 };
 
 TEST_P(TestAllMovements, Test) {
@@ -44,17 +39,19 @@ TEST_P(TestAllMovements, Test) {
   pgn_file.close();
 
   // initialize all variables
-  pgn_ = new PGNReader(filename);
-  game_ = new Game;
+  Board * board = new Board;
+  vector<Movement *> moves;
+  PGNReader pgn;
 
   // starting position
-  ASSERT_EQ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", game_->FEN());
+  ASSERT_EQ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", board->FEN());
 
   // validate all movements
+  pgn.GetMoves(filename, moves);
   for(size_t i = 0; i < movements.size(); ++i) {
-    game_->Move(pgn_->GetMove(i));
-    cout << game_->GetLastMove() << " --> " << game_->FEN() << endl;
-    ASSERT_EQ(movements[i].second, game_->FEN());
+    board->Move(moves[i]);
+    cout << board->GetMove() << " --> " << board->FEN() << endl;
+    ASSERT_EQ(movements[i].second, board->FEN());
   }
 };
 
