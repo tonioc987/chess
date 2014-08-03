@@ -6,7 +6,9 @@
  */
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 #include <errno.h>
+#include <ncurses.h>
 #include "ChessEngineInterface.h"
 #include "Board.h"
 #include "reader/UCIReader.h"
@@ -198,6 +200,10 @@ void ChessEngineInterface::FullAnalysis(Board * board, bool analyze_white, bool 
     }
 
     board->centipawns = analysis.first;
+    clear();
+    printw("\n%s",board->GetMove().c_str());
+    printw("\n%s",alternative_str.c_str());
+    refresh();
 
     if( board->previous &&
         ((!white_to_move && analyze_white) ||
