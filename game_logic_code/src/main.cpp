@@ -23,15 +23,33 @@ tuple<string, string,bool,bool,long,long> ParseArguments(int argc, char* argv[])
 string PrintUsage();
 
 
-void Print(Board & board) {
+void Print(Board & board, bool print_as_white) {
   char space = ' ';
   char new_line = '\n';
   int color = 0;
   bool isWhiteSquare = true;
   char piece;
+  int rank_start, rank_end, rank_delta;
+  int file_start, file_end, file_delta;
 
-  for(auto rank = 8; rank != 0; --rank) {
-    for(auto file = 0; file != 8; ++file) {
+  if(print_as_white) {
+    rank_start = 7;
+    rank_end = -1;
+    rank_delta = -1;
+    file_start = 0;
+    file_end = 8;
+    file_delta = 1;
+  } else {
+    rank_start = 0;
+    rank_end = 8;
+    rank_delta = 1;
+    file_start = 7;
+    file_end = -1;
+    file_delta = -1;
+  }
+
+  for(auto rank = rank_start; rank != rank_end; rank += rank_delta) {
+    for(auto file = file_start; file != file_end; file += file_delta) {
       color = isWhiteSquare ? NCURSES_WHITE_SQUARE : NCURSES_BLACK_SQUARE;
       piece = board[rank][file];
       if(IsEmpty(piece)) {
@@ -58,6 +76,7 @@ int GameAnalysis(int argc, char* argv[]) {
   string pgnfile;
   bool analize_light;
   bool analize_dark;
+  bool print_as_white = true;
   long time_per_move;
   long blunder_threshold;
   tie(engine_path, pgnfile, analize_light, analize_dark, time_per_move, blunder_threshold) =
@@ -72,7 +91,7 @@ int GameAnalysis(int argc, char* argv[]) {
 
   while(tmp != 'x') {
     clear();
-    Print(*board);
+    Print(*board, print_as_white);
     printw("\n\n%s", board->FEN().c_str());
     printw("\n\nMove(%ld): %s", board->centipawns, board->GetMove().c_str());
 
@@ -109,6 +128,10 @@ int GameAnalysis(int argc, char* argv[]) {
         }
         board = board->previous;
       }
+    }
+    else if(tmp == 'f') {
+      // flip board
+      print_as_white = !print_as_white;
     }
   }
 
