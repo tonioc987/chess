@@ -352,31 +352,21 @@ void Board::AddAlternative(Board * board, std::string alternative_str) {
   UCIReader reader;
   reader.GetMoves(alternative_str, moves);
 
-  Movement * original_move = board->GetMovement();
-  Movement * alternative_move = moves[0];
+  // the root of the alternative is the parent of the current board
+  // the cloned parent is just used to create the alternative branch
+  // when the branch is merged, this parent is no longer needed and
+  // it is deleted
+  Board * cloned_parent = new Board(*(board->previous));
 
-  // just add real alternatives, sometimes the chess engine suggests
-  // the same move that was made
-  if(original_move->source_file != alternative_move->source_file ||
-      original_move->source_rank != alternative_move->source_rank ||
-      original_move->dest_file != alternative_move->dest_file ||
-      original_move->dest_rank != alternative_move->dest_rank) {
-    // the root of the alternative is the parent of the current board
-    // the cloned parent is just used to create the alternative branch
-    // when the branch is merged, this parent is no longer needed and
-    // it is deleted
-    Board * cloned_parent = new Board(*(board->previous));
-
-    // Add moves to cloned parent and then merge the alternative
-    // with the original parent
-    // assume there is at least one movement in the alternative
-    AddMoves(cloned_parent, moves);
-    Board * alternative = cloned_parent->next;
-    alternative->original = board;
-    alternative->previous = board->previous;
-    board->alternative = alternative;
-    delete cloned_parent;
-  }
+  // Add moves to cloned parent and then merge the alternative
+  // with the original parent
+  // assume there is at least one movement in the alternative
+  AddMoves(cloned_parent, moves);
+  Board * alternative = cloned_parent->next;
+  alternative->original = board;
+  alternative->previous = board->previous;
+  board->alternative = alternative;
+  delete cloned_parent;
 }
 
 }

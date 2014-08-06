@@ -210,9 +210,7 @@ void ChessEngineInterface::FullAnalysis(Board * board, long time_per_move, long 
       if((!white_to_move && diff > blunder_threshold) ||
          (white_to_move && diff < -blunder_threshold)) {
         Board::AddAlternative(board, alternative_str);
-        if(board->alternative) {
-          board->alternative->centipawns = board->previous->centipawns;
-        }
+        board->alternative->centipawns = board->previous->centipawns;
       }
     }
     board = board->next;
