@@ -19,7 +19,7 @@ using namespace acortes::chess;
 #define NCURSES_BLACK_SQUARE (0x04 | NCURSES_COLOR_LSB)
 
 
-tuple<string, string,bool,bool,long,long> ParseArguments(int argc, char* argv[]);
+tuple<string, string,long,long> ParseArguments(int argc, char* argv[]);
 string PrintUsage();
 
 
@@ -74,18 +74,16 @@ int GameAnalysis(int argc, char* argv[]) {
   int tmp = ' ';
   string engine_path;
   string pgnfile;
-  bool analize_light;
-  bool analize_dark;
   bool print_as_white = true;
   long time_per_move;
   long blunder_threshold;
-  tie(engine_path, pgnfile, analize_light, analize_dark, time_per_move, blunder_threshold) =
+  tie(engine_path, pgnfile, time_per_move, blunder_threshold) =
       ParseArguments(argc, argv);
 
   Board * initial_board = Board::CreateFromPGN(pgnfile);
   ChessEngineInterface engine(engine_path, false);
   clear();
-  engine.FullAnalysis(initial_board, analize_light, analize_dark, time_per_move, blunder_threshold);
+  engine.FullAnalysis(initial_board, time_per_move, blunder_threshold);
 
   Board * board = initial_board;
 
@@ -156,20 +154,16 @@ int main(int argc, char* argv[]) {
   endwin();
 }
 
-tuple<string, string, bool, bool, long, long> ParseArguments(int argc, char * argv[]) {
+tuple<string, string, long, long> ParseArguments(int argc, char * argv[]) {
 
   string engine = "";
   string pgnfile = "";
-  bool analize_light = false;
-  bool analize_dark = false;
   long time_per_move = 1;
   long blunder_threshold = 50;
 
   static struct option long_options[] = {
       {"engine", required_argument, 0,'e'},
       {"pgnfile", required_argument, 0,'f'},
-      {"analyze_light", no_argument,0,'l'},
-      {"analyze_dark", no_argument, 0, 'd'},
       {"time_per_move", required_argument, 0, 't'},
       {"blunder_threshold", required_argument,0,'b'}
   };
@@ -188,16 +182,6 @@ tuple<string, string, bool, bool, long, long> ParseArguments(int argc, char * ar
 
       case 'f': {
         pgnfile = string(optarg);
-        break;
-      }
-
-      case 'l': {
-        analize_light = true;
-        break;
-      }
-
-      case 'd': {
-        analize_dark = true;
         break;
       }
 
@@ -223,11 +207,7 @@ tuple<string, string, bool, bool, long, long> ParseArguments(int argc, char * ar
     exit(EXIT_FAILURE);
   }
 
-  if(!analize_light && !analize_dark) {
-    analize_light = true;
-  }
-
-  return make_tuple(engine, pgnfile, analize_light, analize_dark, time_per_move, blunder_threshold);
+  return make_tuple(engine, pgnfile, time_per_move, blunder_threshold);
 }
 
 string PrintUsage() {

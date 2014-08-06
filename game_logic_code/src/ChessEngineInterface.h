@@ -22,8 +22,7 @@ class ChessEngineInterface {
 public:
   ChessEngineInterface(std::string engine_path, bool verbose = false);
   void Initialize();
-  void FullAnalysis(Board * board, bool analyze_white, bool analyze_black,
-      long time_per_move, long blunder_threshold);
+  void FullAnalysis(Board * board, long time_per_move, long blunder_threshold);
   ~ChessEngineInterface();
 
 private:

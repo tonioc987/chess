@@ -172,8 +172,7 @@ void ChessEngineInterface::WriteLine(string msg) {
 }
 
 
-void ChessEngineInterface::FullAnalysis(Board * board, bool analyze_white, bool analyze_black,
-    long time_per_move, long blunder_threshold) {
+void ChessEngineInterface::FullAnalysis(Board * board, long time_per_move, long blunder_threshold) {
 
   string alternative_str = "";
 
@@ -205,9 +204,7 @@ void ChessEngineInterface::FullAnalysis(Board * board, bool analyze_white, bool 
     printw("\n%s",alternative_str.c_str());
     refresh();
 
-    if( board->previous &&
-        ((!white_to_move && analyze_white) ||
-         (white_to_move && analyze_black))) {
+    if(board->previous) {
       auto diff = board->previous->centipawns - board->centipawns;
 
       if((!white_to_move && diff > blunder_threshold) ||
