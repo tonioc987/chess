@@ -22,41 +22,32 @@ using namespace acortes::chess;
 tuple<string, string,bool,bool,long,long> ParseArguments(int argc, char* argv[]);
 string PrintUsage();
 
-void PrintFEN(string FEN) {
+
+void Print(Board & board) {
   char space = ' ';
   char new_line = '\n';
-  int num_spaces = 0;
   int color = 0;
   bool isWhiteSquare = true;
+  char piece;
 
-  for(char & c : FEN) {
-    if(c == ' ') {
-      break;
-    }
-    else if(c == '/') {
-      addch(new_line);
-      isWhiteSquare = !isWhiteSquare;
-      continue;
-    }
-
-    if(c > '0' && c <= '9') {
-      num_spaces = c - '0';
-      for(int i = 0; i < num_spaces; ++i) {
-        color = isWhiteSquare ? NCURSES_WHITE_SQUARE : NCURSES_BLACK_SQUARE;
-        addch(space | COLOR_PAIR(color));
-        addch(space | COLOR_PAIR(color));
-        addch(space | COLOR_PAIR(color));
-        isWhiteSquare = !isWhiteSquare;
-      }
-    }
-    else {
+  for(auto rank = 8; rank != 0; --rank) {
+    for(auto file = 0; file != 8; ++file) {
       color = isWhiteSquare ? NCURSES_WHITE_SQUARE : NCURSES_BLACK_SQUARE;
-      color |= isupper(c) ? NCURSES_WHITE_PIECE : NCURSES_BLACK_PIECE;
-      addch(space | COLOR_PAIR(color));
-      addch(c | A_BOLD | COLOR_PAIR(color));
-      addch(space | COLOR_PAIR(color));
+      piece = board[rank][file];
+      if(IsEmpty(piece)) {
+        addch(space | COLOR_PAIR(color));
+        addch(space | COLOR_PAIR(color));
+        addch(space | COLOR_PAIR(color));
+      } else {
+        color |= isupper(piece) ? NCURSES_WHITE_PIECE : NCURSES_BLACK_PIECE;
+        addch(space | COLOR_PAIR(color));
+        addch(piece | A_BOLD | COLOR_PAIR(color));
+        addch(space | COLOR_PAIR(color));
+      }
       isWhiteSquare = !isWhiteSquare;
     }
+    addch(new_line);
+    isWhiteSquare = !isWhiteSquare;
   }
 }
 
@@ -81,7 +72,7 @@ int GameAnalysis(int argc, char* argv[]) {
 
   while(tmp != 'x') {
     clear();
-    PrintFEN(board->FEN().c_str());
+    Print(*board);
     printw("\n\n%s", board->FEN().c_str());
     printw("\n\nMove(%ld): %s", board->centipawns, board->GetMove().c_str());
 

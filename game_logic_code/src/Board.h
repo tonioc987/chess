@@ -26,7 +26,7 @@ public:
   bool IsWhiteTurn() const { return is_white_turn_; }
   std::string GetMove() const { return movement_->move; }
   Movement * GetMovement() const { return movement_; }
-  void Print(char (* printed_board)[64]) const;
+  char* operator[](size_t idx) { return board_[idx]; }
 
   static void AddMoves(Board * board, std::vector<Movement *> & moves);
   static Board * CreateFromPGN(std::string pgnfile);

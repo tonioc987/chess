@@ -318,22 +318,6 @@ string Board::FEN() const {
   return fen;
 }
 
-void Board::Print(char (* printed_board)[64]) const {
-  char * c = *printed_board;
-  char space = '.';
-
-  for(auto rank = 8; rank != 0; --rank) {
-    for(auto file = 0; file != 8; ++file) {
-      if(IsEmpty(board_[rank][file])) {
-        *c = space;
-      } else {
-        *c = board_[rank][file];
-      }
-      c++;
-    }
-  }
-}
-
 
 void Board::AddMoves(Board * board, std::vector<Movement *> & moves) {
   Board * current_board = board;
