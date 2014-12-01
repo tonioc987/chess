@@ -32,6 +32,9 @@ void PGNReader::GetMoves(string filename, vector<Movement*> & moves) {
   for(auto & movement : moves) {
     if(!isWhite) {
       movement->piece = Black(movement->piece);
+      if(!IsEmpty(movement->promoted_piece)) {
+        movement->promoted_piece = Black(movement->promoted_piece);
+      }
     }
     isWhite = !isWhite;
   }
@@ -68,6 +71,21 @@ Movement * PGNReader::ParseMove(std::string move) {
     m->is_mate = true;
     i--;
   }
+
+  // process promotion e.g. e8=Q
+  switch(move[i]) {
+    case 'R':
+    case 'B':
+    case 'N':
+    case 'Q': {
+      m->promoted_piece = move[i];
+      i--;
+      assert('=' == move[i]);
+      i--;
+      break;
+    }
+  }
+
 
   // 2nd process destination rank
   m->dest_rank = GetRank(move[i]);
@@ -123,26 +141,15 @@ Movement * PGNReader::ParseMove(std::string move) {
   // 6th piece type
   assert(i==0);
   switch(move[i]) {
-    case 'R': {
-      m->piece = ROOK;
-      break;
-    }
-    case 'B': {
-      m->piece = BISHOP;
-      break;
-    }
-    case 'N': {
-      m->piece = KNIGHT;
-      break;
-    }
-    case 'Q': {
-      m->piece = QUEEN;
-      break;
-    }
+    case 'R':
+    case 'B':
+    case 'N':
+    case 'Q':
     case 'K': {
-      m->piece = KING;
+      m->piece = move[i];
       break;
     }
+
     case 'a':
     case 'b':
     case 'c':

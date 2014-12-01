@@ -41,7 +41,6 @@ struct Movement {
   bool is_enpassant;
   bool is_check;
   bool is_mate;
-  bool is_promotion;
   char promoted_piece;
   std::string move;
   char piece;
@@ -57,7 +56,6 @@ struct Movement {
     is_enpassant = false;
     is_check = false;
     is_mate = false;
-    is_promotion = false;
     promoted_piece = EMPTY;
     move = "";
     piece = EMPTY;

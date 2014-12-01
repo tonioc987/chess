@@ -17,7 +17,7 @@ namespace chess {
 
 Movement * UCIReader::ParseMove(string move) {
   // right now support just simple movements
-  assert(move.size() == 4);
+  assert(move.size() == 4 || move.size() == 5);
   assert(move[0] >= 'a' && move[0] <= 'h');
   assert(move[1] >= '1' && move[1] <= '8');
   assert(move[2] >= 'a' && move[2] <= 'h');
@@ -37,8 +37,9 @@ Movement * UCIReader::ParseMove(string move) {
   m->dest_rank = GetRank(move[i]);
   i++;
 
-  // TODO
-  //m->is_promotion = false;
+  if(move.size() == 5) {
+    m->promoted_piece = move[i];
+  }
 
   return m;
 }

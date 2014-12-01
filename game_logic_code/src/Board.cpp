@@ -6,6 +6,7 @@
  */
 
 #include <cassert>
+#include <ncurses.h>
 #include "Board.h"
 #include "pieces/Bishop.h"
 #include "pieces/King.h"
@@ -91,6 +92,8 @@ Board::Board() {
 
 
 void Board::Move(Movement * move) {
+  printw("\n%s",move->move.c_str());
+  refresh();
   // if the movement is from UCI notation, then it has just source square
   // add other data like: piece type, color, capture, castle.
   if(move->source_file != -1 && move->source_rank != -1 &&
@@ -110,6 +113,14 @@ void Board::Move(Movement * move) {
          (en_passant_file_ == move->dest_file) &&
          (en_passant_capture_rank_ == move->dest_rank) ) ) {
       move->is_capture = true;
+    }
+
+    if(!IsEmpty(move->promoted_piece)) {
+      if(IsWhite(move->piece)) {
+        move->promoted_piece = White(move->promoted_piece);
+      } else {
+        move->promoted_piece = Black(move->promoted_piece);
+      }
     }
   }
 
@@ -148,6 +159,10 @@ void Board::Move(Movement * move) {
       }
       board_[move->dest_rank][move->dest_file] = board_[move->source_rank][move->source_file];
       board_[move->source_rank][move->source_file] = EMPTY;
+
+      if(!IsEmpty(move->promoted_piece)) {
+        board_[move->dest_rank][move->dest_file] = move->promoted_piece;
+      }
     }
   } else {
     assert(false);

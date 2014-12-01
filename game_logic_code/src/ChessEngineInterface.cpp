@@ -201,7 +201,6 @@ void ChessEngineInterface::FullAnalysis(Board * board, long time_per_move, long 
     board->centipawns = analysis.first;
     clear();
     printw("\n%s",board->GetMove().c_str());
-    printw("\n%s",alternative_str.c_str());
     refresh();
 
     if(board->previous) {
