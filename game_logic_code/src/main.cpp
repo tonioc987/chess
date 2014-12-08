@@ -1,73 +1,16 @@
 #include <ncurses.h>
 #include <getopt.h>
 #include <tuple>
+#include <thread>
 #include "Board.h"
 #include "ChessEngineInterface.h"
+#include "Gui.h"
 
 using namespace std;
 using namespace acortes::chess;
 
-// Looks like color index 0 of ncurses is reserved or at least cannot be
-// configured. That's why the LSBit of this constants is set to 1
-// bit 0 always set to 1
-// bit 1 is used to select piece color
-// bit 2 is used to select square color
-#define NCURSES_COLOR_LSB 0x01
-#define NCURSES_WHITE_PIECE (0x00 | NCURSES_COLOR_LSB)
-#define NCURSES_BLACK_PIECE (0x02 | NCURSES_COLOR_LSB)
-#define NCURSES_WHITE_SQUARE (0x00 | NCURSES_COLOR_LSB)
-#define NCURSES_BLACK_SQUARE (0x04 | NCURSES_COLOR_LSB)
-
-
 tuple<string, string,long,long> ParseArguments(int argc, char* argv[]);
 string PrintUsage();
-
-
-void Print(Board & board, bool print_as_white) {
-  char space = ' ';
-  char new_line = '\n';
-  int color = 0;
-  bool isWhiteSquare = true;
-  char piece;
-  int rank_start, rank_end, rank_delta;
-  int file_start, file_end, file_delta;
-
-  if(print_as_white) {
-    rank_start = 7;
-    rank_end = -1;
-    rank_delta = -1;
-    file_start = 0;
-    file_end = 8;
-    file_delta = 1;
-  } else {
-    rank_start = 0;
-    rank_end = 8;
-    rank_delta = 1;
-    file_start = 7;
-    file_end = -1;
-    file_delta = -1;
-  }
-
-  for(auto rank = rank_start; rank != rank_end; rank += rank_delta) {
-    for(auto file = file_start; file != file_end; file += file_delta) {
-      color = isWhiteSquare ? NCURSES_WHITE_SQUARE : NCURSES_BLACK_SQUARE;
-      piece = board[rank][file];
-      if(IsEmpty(piece)) {
-        addch(space | COLOR_PAIR(color));
-        addch(space | COLOR_PAIR(color));
-        addch(space | COLOR_PAIR(color));
-      } else {
-        color |= isupper(piece) ? NCURSES_WHITE_PIECE : NCURSES_BLACK_PIECE;
-        addch(space | COLOR_PAIR(color));
-        addch(piece | A_BOLD | COLOR_PAIR(color));
-        addch(space | COLOR_PAIR(color));
-      }
-      isWhiteSquare = !isWhiteSquare;
-    }
-    addch(new_line);
-    isWhiteSquare = !isWhiteSquare;
-  }
-}
 
 
 int GameAnalysis(int argc, char* argv[]) {
@@ -82,28 +25,15 @@ int GameAnalysis(int argc, char* argv[]) {
 
   Board * initial_board = Board::CreateFromPGN(pgnfile);
   ChessEngineInterface engine(engine_path, false);
-  clear();
-  engine.FullAnalysis(initial_board, time_per_move, blunder_threshold);
+  // no need to analyze first board, default centipawns = 0 is OK
+  thread analysis{&ChessEngineInterface::FullAnalysis, &engine,
+    initial_board->next, time_per_move, blunder_threshold};
 
   Board * board = initial_board;
-
   while(tmp != 'x') {
-    clear();
-    Print(*board, print_as_white);
-    printw("\n\n%s", board->FEN().c_str());
-    printw("\n\nMove(%ld): %s", board->centipawns, board->GetMove().c_str());
-
-    if(board->original) {
-      printw("\n\nOriginal(%ld): %s", board->original->centipawns, board->original->GetMove().c_str());
-    }
-
-    if(board->alternative) {
-      printw("\n\nAlternative(%ld): %s", board->alternative->centipawns, board->alternative->GetMove().c_str());
-    }
-
-    printw("\n\n");
-    refresh();
-
+    UpdateMoves(board, nullptr);
+    UpdateBoard(*board, print_as_white);
+    UpdateFEN(board->FEN());
     tmp = getch();
     if(tmp == KEY_UP && board->previous) {
       board = board->previous;
@@ -133,25 +63,14 @@ int GameAnalysis(int argc, char* argv[]) {
     }
   }
 
+  analysis.join();
   return 0;
 }
 
 int main(int argc, char* argv[]) {
-  // ncurses initialization
-  initscr();
-  cbreak();
-  noecho();
-  keypad(stdscr, TRUE);
-  start_color();
-  init_pair(NCURSES_WHITE_PIECE | NCURSES_WHITE_SQUARE, COLOR_YELLOW, COLOR_RED);
-  init_pair(NCURSES_WHITE_PIECE | NCURSES_BLACK_SQUARE, COLOR_YELLOW, COLOR_BLACK);
-  init_pair(NCURSES_BLACK_PIECE | NCURSES_WHITE_SQUARE, COLOR_CYAN, COLOR_RED);
-  init_pair(NCURSES_BLACK_PIECE | NCURSES_BLACK_SQUARE, COLOR_CYAN, COLOR_BLACK);
-
+	InitNCurses();
   GameAnalysis(argc, argv);
-
-  // ncurses clean up
-  endwin();
+  EndNCurses();
 }
 
 tuple<string, string, long, long> ParseArguments(int argc, char * argv[]) {
@@ -211,6 +130,6 @@ tuple<string, string, long, long> ParseArguments(int argc, char * argv[]) {
 }
 
 string PrintUsage() {
-  return "chess-analyzer --engine=path-to-engine --pgnfile=path-to-pgn [--analize_light] "
-          "[--analize-dark] [--time_per_move=seconds] [--blunder_threshold=centipawns]";
+  return "chess-analyzer --engine=path-to-engine --pgnfile=path-to-pgn "
+          "[--time_per_move=seconds] [--blunder_threshold=centipawns]";
 }

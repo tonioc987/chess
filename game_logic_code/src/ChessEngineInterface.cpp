@@ -8,10 +8,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
-#include <ncurses.h>
 #include "ChessEngineInterface.h"
 #include "Board.h"
 #include "reader/UCIReader.h"
+#include "Gui.h"
 
 using namespace std;
 
@@ -199,9 +199,7 @@ void ChessEngineInterface::FullAnalysis(Board * board, long time_per_move, long 
     }
 
     board->centipawns = analysis.first;
-    clear();
-    printw("\n%s",board->GetMove().c_str());
-    refresh();
+    UpdateMoves(nullptr, board);
 
     if(board->previous) {
       auto diff = board->previous->centipawns - board->centipawns;

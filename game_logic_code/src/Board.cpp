@@ -6,7 +6,6 @@
  */
 
 #include <cassert>
-#include <ncurses.h>
 #include "Board.h"
 #include "pieces/Bishop.h"
 #include "pieces/King.h"
@@ -92,8 +91,6 @@ Board::Board() {
 
 
 void Board::Move(Movement * move) {
-  printw("\n%s",move->move.c_str());
-  refresh();
   // if the movement is from UCI notation, then it has just source square
   // add other data like: piece type, color, capture, castle.
   if(move->source_file != -1 && move->source_rank != -1 &&
@@ -347,6 +344,7 @@ void Board::AddMoves(Board * board, std::vector<Movement *> & moves) {
     new_board->next = nullptr;
     new_board->alternative = nullptr;
     new_board->original = nullptr;
+    new_board->centipawns = 0;
     current_board = current_board->next;
   }
 }

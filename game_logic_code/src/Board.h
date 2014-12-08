@@ -27,6 +27,7 @@ public:
   std::string GetMove() const { return movement_->move; }
   Movement * GetMovement() const { return movement_; }
   char* operator[](size_t idx) { return board_[idx]; }
+  int move_number() const { return move_number_; }
 
   static void AddMoves(Board * board, std::vector<Movement *> & moves);
   static Board * CreateFromPGN(std::string pgnfile);
