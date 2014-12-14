@@ -41,6 +41,7 @@ private:
   size_t Read();
   void ReadLines(std::vector<std::string> & lines);
   std::string GetNextLine();
+  void ClearLines();
   void WaitForLine(std::string line_start);
   void Write(std::string msg);
   void WriteLine(std::string msg);

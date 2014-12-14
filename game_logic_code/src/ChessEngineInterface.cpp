@@ -8,10 +8,12 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
+#include <cassert>
 #include "ChessEngineInterface.h"
 #include "Board.h"
 #include "reader/UCIReader.h"
 #include "Gui.h"
+#include "Logger.h"
 
 using namespace std;
 
@@ -59,9 +61,7 @@ void ChessEngineInterface::Initialize() {
   }
 
   // initial handshaking
-  index_current_line_ = 0;
-  lines_.clear();
-
+  ClearLines();
   WaitForLine("Stockfish");
   WriteLine("uci");
   WaitForLine("uciok");
@@ -121,9 +121,7 @@ void ChessEngineInterface::ReadLines(vector<string> & lines) {
       if(*current == '\n') {
         temp_string_.append(start, current);
         lines.push_back(temp_string_);
-        //if (verbose_) {
-        //  cout << temp_string_ << endl;
-        //}
+        LOG(temp_string_.c_str());
         temp_string_.clear();
         start = current + 1;
       }
@@ -151,6 +149,10 @@ std::string ChessEngineInterface::GetNextLine() {
   return line;
 }
 
+void ChessEngineInterface::ClearLines() {
+  index_current_line_ = 0;
+  lines_.clear();
+}
 
 void ChessEngineInterface::WaitForLine(string line_start) {
   string line;
@@ -188,7 +190,12 @@ void ChessEngineInterface::FullAnalysis(Board * board, long time_per_move, long 
     //       => can evaluate white movement
     bool white_to_move = board->IsWhiteTurn();
 
+    UpdateMoves(nullptr, board);
+
     // for current move, evaluation of best reply
+    LOG(">>>>>>>> New move <<<<<<<<<<");
+    LOG(board->GetMove().c_str());
+    LOG(board->FEN().c_str());
     auto analysis = Analyze(board->FEN(), time_per_move);
 
     // engine evaluations are always from its viewpoint
@@ -197,16 +204,18 @@ void ChessEngineInterface::FullAnalysis(Board * board, long time_per_move, long 
     if(!white_to_move) {
       analysis.first *= -1;
     }
-
     board->centipawns = analysis.first;
-    UpdateMoves(nullptr, board);
+    LOG(to_string(board->centipawns).c_str());
+    LOG(analysis.second.c_str());
 
     if(board->previous) {
       auto diff = board->previous->centipawns - board->centipawns;
 
       if((!white_to_move && diff > blunder_threshold) ||
          (white_to_move && diff < -blunder_threshold)) {
+        LOG(to_string(diff).c_str());
         Board::AddAlternative(board, alternative_str);
+        LOG(board->FEN().c_str());
         board->alternative->centipawns = board->previous->centipawns;
       }
     }
@@ -224,19 +233,29 @@ pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
 
   // get best line
   for(auto it = lines_.rbegin(); it != lines_.rend(); it++) {
+    long value = 100000; // default value for checkmate
     string str = *it;
-    size_t index1 = str.find(" score cp ");
+    string pattern = " score mate ";
+    size_t index1 = str.find(pattern);
+    if(index1 == string::npos) {
+      pattern = " score cp ";
+      index1 = str.find(pattern);
+      if(index1 != string::npos) {
+        index1 += pattern.length();
+        int index1_end = str.find(" ",index1);
+        string value_str = str.substr(index1, index1_end - index1);
+        value = atol(value_str.c_str());
+      }
+    }
     size_t index2 = str.find(" pv ");
     if(index1 != string::npos && index2 != string::npos) {
-      index1 += string(" score cp ").length();
-      int index1_end = str.find(" ",index1);
-      string value_str = str.substr(index1, index1_end - index1);
-      long value = atol(value_str.c_str());
       index2 += string(" pv ").length();
       string movements = str.substr(index2);
+      ClearLines();
       return make_pair(value, movements);
     }
   }
+  assert(false);
   return make_pair(0,"");
 }
 
