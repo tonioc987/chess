@@ -231,25 +231,54 @@ pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
   WriteLine("go movetime " + to_string(time_secs*1000));
   WaitForLine("bestmove");
 
-  // get best line
-  for(auto it = lines_.rbegin(); it != lines_.rend(); it++) {
-    long value = 100000; // default value for checkmate
-    string str = *it;
-    string pattern = " score mate ";
-    size_t index1 = str.find(pattern);
-    if(index1 == string::npos) {
-      pattern = " score cp ";
-      index1 = str.find(pattern);
-      if(index1 != string::npos) {
-        index1 += pattern.length();
-        int index1_end = str.find(" ",index1);
-        string value_str = str.substr(index1, index1_end - index1);
-        value = atol(value_str.c_str());
+  auto it = lines_.rbegin();
+  auto it_end = lines_.rend();
+  static const string bestmove_pattern = "bestmove ";
+  static const string mate_pattern = " score mate ";
+  static const string cp_pattern = " score cp ";
+  static const string pv_pattern = " pv ";
+
+  for(; it != it_end; ++it) {
+    size_t index = it->find(bestmove_pattern);
+    if(index != string::npos) {
+      index += bestmove_pattern.length();
+      string candidate_move = it->substr(index,
+          it->find(" ", index)-index);
+      if(candidate_move.compare("(none)") == 0) {
+        // in case of checkmate, there is no reply
+        return make_pair(0,"");
+      } else {
+        // move on to look for the best move
+        break;
       }
     }
-    size_t index2 = str.find(" pv ");
+  }
+
+  // get best line
+  for(; it != it_end; ++it) {
+    long value = 0;
+    const string &str = *it;
+    const string *pattern = &cp_pattern;
+    size_t index1 = str.find(*pattern);
+    if(index1 == string::npos) {
+      pattern = &mate_pattern;
+      index1 = str.find(*pattern);
+    }
+
+    if(index1 != string::npos) {
+      index1 += pattern->length();
+      string value_str = str.substr(index1,
+          str.find(" ", index1) - index1);
+      value = atol(value_str.c_str());
+      if(pattern->compare(mate_pattern) == 0) {
+        // very high evaluation for mate
+        value = (value < 0) ? -100000 : 100000;
+      }
+    }
+
+    size_t index2 = str.find(pv_pattern);
     if(index1 != string::npos && index2 != string::npos) {
-      index2 += string(" pv ").length();
+      index2 += pv_pattern.length();
       string movements = str.substr(index2);
       ClearLines();
       return make_pair(value, movements);
