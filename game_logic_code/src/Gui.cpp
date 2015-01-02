@@ -107,7 +107,7 @@ public:
         } else {
           color |= isupper(piece) ? NCURSES_WHITE_PIECE : NCURSES_BLACK_PIECE;
           InsertSpaces(2, color);
-          waddch(window_, piece | A_BOLD | COLOR_PAIR(color));
+          waddch(window_, piece | (AreSimilarPieces(piece, PAWN) ? 0 : A_BOLD) | COLOR_PAIR(color));
           InsertSpaces(2, color);
         }
         isWhiteSquare = !isWhiteSquare;
