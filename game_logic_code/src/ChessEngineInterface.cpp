@@ -26,7 +26,7 @@ enum PIPE_FILE_DESC {
 };
 
 ChessEngineInterface::ChessEngineInterface(string engine_path, bool verbose) :
-  engine_path_(engine_path), verbose_(verbose) {
+  engine_path_(engine_path), verbose_(verbose), request_stop_(false) {
   Initialize();
 }
 
@@ -177,8 +177,9 @@ void ChessEngineInterface::WriteLine(string msg) {
 void ChessEngineInterface::FullAnalysis(Board * board, long time_per_move, long blunder_threshold) {
 
   string alternative_str = "";
+  request_stop_ = false;
 
-  while(board != nullptr) {
+  while(board != nullptr && !request_stop_.load()) {
     // IsWhiteTurn stores who is going to move next
     // true => black just moved
     //      => white to move

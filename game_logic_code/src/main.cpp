@@ -1,3 +1,5 @@
+#include <cstdio>
+#include <cstring>
 #include <ncurses.h>
 #include <getopt.h>
 #include <tuple>
@@ -5,29 +7,41 @@
 #include "Board.h"
 #include "ChessEngineInterface.h"
 #include "Gui.h"
+#include "Logger.h"
 
 using namespace std;
 using namespace acortes::chess;
 
-tuple<string, string,long,long> ParseArguments(int argc, char* argv[]);
+struct ConfigParams {
+  string engine;
+  string pgn_file;
+  int time_per_move{1};
+  int blunder_threshold{50};
+};
+
+int GameAnalysis(int argc, char* argv[]);
+void ReadConfigFile(ConfigParams *params);
+void ParseArguments(int argc, char* argv[], ConfigParams *params);
 string PrintUsage();
 
+int main(int argc, char* argv[]) {
+	InitNCurses();
+  GameAnalysis(argc, argv);
+  EndNCurses();
+}
 
 int GameAnalysis(int argc, char* argv[]) {
   int tmp = ' ';
-  string engine_path;
-  string pgnfile;
   bool print_as_white = true;
-  long time_per_move;
-  long blunder_threshold;
-  tie(engine_path, pgnfile, time_per_move, blunder_threshold) =
-      ParseArguments(argc, argv);
+  ConfigParams params;
+  ReadConfigFile(&params);
+  ParseArguments(argc, argv, &params);
 
-  Board * initial_board = Board::CreateFromPGN(pgnfile);
-  ChessEngineInterface engine(engine_path, false);
+  Board * initial_board = Board::CreateFromPGN(params.pgn_file);
+  ChessEngineInterface engine(params.engine, false);
   // no need to analyze first board, default centipawns = 0 is OK
   thread analysis{&ChessEngineInterface::FullAnalysis, &engine,
-    initial_board->next, time_per_move, blunder_threshold};
+    initial_board->next, params.time_per_move, params.blunder_threshold};
 
   Board * board = initial_board;
   while(tmp != 'x') {
@@ -63,22 +77,36 @@ int GameAnalysis(int argc, char* argv[]) {
     }
   }
 
+  engine.set_request_stop();
   analysis.join();
   return 0;
 }
 
-int main(int argc, char* argv[]) {
-	InitNCurses();
-  GameAnalysis(argc, argv);
-  EndNCurses();
+void ReadConfigFile(ConfigParams *config) {
+  FILE * file_ptr;
+  char key[100];
+  char value[100];
+  int items;
+
+  file_ptr = fopen(".config", "r");
+  if(file_ptr) {
+    items = fscanf(file_ptr, "%s %s", key, value);
+    while(items == 2) {
+      LOG(key); LOG(value);
+      if(strcmp(key,"engine") == 0) {
+        config->engine = string(value);
+      } else if(strcmp(key, "time_per_move") == 0) {
+        config->time_per_move = atol(value);
+      } else if(strcmp(key, "blunder_threshold") == 0) {
+        config->blunder_threshold = atol(value);
+      }
+      items = fscanf(file_ptr, "%s %s", key, value);
+    }
+    fclose(file_ptr);
+  }
 }
 
-tuple<string, string, long, long> ParseArguments(int argc, char * argv[]) {
-
-  string engine = "";
-  string pgnfile = "";
-  long time_per_move = 1;
-  long blunder_threshold = 50;
+void ParseArguments(int argc, char * argv[], ConfigParams *params) {
 
   static struct option long_options[] = {
       {"engine", required_argument, 0,'e'},
@@ -95,22 +123,22 @@ tuple<string, string, long, long> ParseArguments(int argc, char * argv[]) {
     switch(opt) {
 
       case 'e': {
-        engine = string(optarg);
+        params->engine = string(optarg);
         break;
       }
 
       case 'f': {
-        pgnfile = string(optarg);
+        params->pgn_file = string(optarg);
         break;
       }
 
       case 't': {
-        time_per_move = atol(optarg);
+        params->time_per_move = atol(optarg);
         break;
       }
 
       case 'b': {
-        blunder_threshold = atol(optarg);
+        params->blunder_threshold = atol(optarg);
         break;
       }
 
@@ -121,12 +149,10 @@ tuple<string, string, long, long> ParseArguments(int argc, char * argv[]) {
     }
   }
 
-  if(engine.compare("") == 0 || pgnfile.compare("") == 0) {
+  if(params->engine.compare("") == 0 || params->pgn_file.compare("") == 0) {
     PrintUsage();
     exit(EXIT_FAILURE);
   }
-
-  return make_tuple(engine, pgnfile, time_per_move, blunder_threshold);
 }
 
 string PrintUsage() {

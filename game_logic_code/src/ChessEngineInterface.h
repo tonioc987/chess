@@ -10,6 +10,7 @@
 #include <queue>
 #include <string>
 #include <utility>
+#include <atomic>
 
 namespace acortes {
 namespace chess {
@@ -24,6 +25,7 @@ public:
   void Initialize();
   void FullAnalysis(Board * board, long time_per_move, long blunder_threshold);
   ~ChessEngineInterface();
+  void set_request_stop() { request_stop_ = true; }
 
 private:
   std::string engine_path_;
@@ -37,6 +39,7 @@ private:
   std::vector<std::string> lines_;
   size_t index_current_line_;
   bool verbose_;
+  std::atomic<bool> request_stop_;
 
   size_t Read();
   void ReadLines(std::vector<std::string> & lines);
