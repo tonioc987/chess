@@ -119,41 +119,47 @@ void ReadConfigFile(ConfigParams *config) {
 }
 
 void ParseArguments(int argc, char * argv[], ConfigParams *params) {
-  static struct option long_options[] = {
-      {"engine", required_argument, 0, 'e'},
-      {"pgnfile", required_argument, 0, 'f'},
-      {"time_per_move", required_argument, 0, 't'},
-      {"blunder_threshold", required_argument, 0, 'b'}
-  };
-  int opt = 0;
-  int long_index = 0;
+  if (argc == 2) {
+    // if just a single argument, assume it is the pgn file
+    params->pgn_file = string(argv[1]);
+  } else {
+    // complex argument parsing
+    static struct option long_options[] = {
+        {"engine", required_argument, 0, 'e'},
+        {"pgnfile", required_argument, 0, 'f'},
+        {"time_per_move", required_argument, 0, 't'},
+        {"blunder_threshold", required_argument, 0, 'b'}
+    };
+    int opt = 0;
+    int long_index = 0;
 
-  while ((opt = getopt_long(argc, argv, "e:f:t:b:a:",
-          long_options, &long_index)) != -1) {
-    switch (opt) {
-      case 'e': {
-        params->engine = string(optarg);
-        break;
-      }
+    while ((opt = getopt_long(argc, argv, "e:f:t:b:a:",
+            long_options, &long_index)) != -1) {
+      switch (opt) {
+        case 'e': {
+          params->engine = string(optarg);
+          break;
+        }
 
-      case 'f': {
-        params->pgn_file = string(optarg);
-        break;
-      }
+        case 'f': {
+          params->pgn_file = string(optarg);
+          break;
+        }
 
-      case 't': {
-        params->time_per_move = atol(optarg);
-        break;
-      }
+        case 't': {
+          params->time_per_move = atol(optarg);
+          break;
+        }
 
-      case 'b': {
-        params->blunder_threshold = atol(optarg);
-        break;
-      }
+        case 'b': {
+          params->blunder_threshold = atol(optarg);
+          break;
+        }
 
-      default: {
-        PrintUsage();
-        exit(EXIT_FAILURE);
+        default: {
+          PrintUsage();
+          exit(EXIT_FAILURE);
+        }
       }
     }
   }

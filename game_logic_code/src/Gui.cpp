@@ -198,17 +198,17 @@ class MovesWindow : public NCursesWindow {
       if (temp_board == analysis_) wattron(window_, A_BOLD);
       mvwprintw(window_, i, 4, "%s", temp_board->GetMove().c_str());
       if (temp_board->centipawns) {
-        mvwprintw(window_, i, 10, "%ld", temp_board->centipawns);
+        mvwprintw(window_, i, 10, "%d", temp_board->centipawns);
       }
       if (temp_board->original) {
         auto temp = temp_board->original;
         mvwprintw(window_, i, 15, "%s", temp->GetMove().c_str());
-        mvwprintw(window_, i, 20, "%ld", temp->centipawns);
+        mvwprintw(window_, i, 20, "%d", temp->centipawns);
       }
       if (temp_board->alternative) {
         auto alt = temp_board->alternative;
         mvwprintw(window_, i, 15, "%s", alt->GetMove().c_str());
-        mvwprintw(window_, i, 20, "%ld", alt->centipawns);
+        mvwprintw(window_, i, 20, "%d", alt->centipawns);
       }
       if (temp_board == board_) wattroff(window_, A_STANDOUT);
       if (temp_board == analysis_) wattroff(window_, A_BOLD);
