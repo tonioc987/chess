@@ -13,8 +13,9 @@ namespace acortes {
 namespace chess {
 
 class Knight {
-public:
-  static bool IsValidMove(char (&board)[8][8], int file, int rank, Movement & move){
+ public:
+  static bool IsValidMove(const char (&board)[8][8],
+      int file, int rank, const Movement & move) {
     int file_movement = abs(file - move.dest_file);
     int rank_movement = abs(rank - move.dest_rank);
 
@@ -24,10 +25,10 @@ public:
     assert(file != -1);
     assert(rank != -1);
 
-    if(file_movement == 1 && rank_movement == 2) {
+    if (file_movement == 1 && rank_movement == 2) {
       // forward/backward movement
       return true;
-    } else if(file_movement == 2 && rank_movement == 1) {
+    } else if (file_movement == 2 && rank_movement == 1) {
       // left/right movement
       return true;
     }
@@ -35,7 +36,7 @@ public:
   }
 };
 
-}
-}
+}  // namespace chess
+}  // namespace acortes
 
 #endif

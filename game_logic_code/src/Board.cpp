@@ -6,6 +6,8 @@
  */
 
 #include <cassert>
+#include <string>
+#include <vector>
 #include "Board.h"
 #include "pieces/Bishop.h"
 #include "pieces/King.h"
@@ -15,8 +17,6 @@
 #include "pieces/Rook.h"
 #include "reader/PGNReader.h"
 #include "reader/UCIReader.h"
-
-using namespace std;
 
 namespace acortes {
 namespace chess {
@@ -47,17 +47,17 @@ Board::Board() {
   board_[0][6] = White(KNIGHT);
   board_[0][7] = White(ROOK);
 
-  for(int i = 0; i < 8; ++i) {
+  for (int i = 0; i < 8; ++i) {
     board_[1][i] = White(PAWN);
   }
 
-  for(int k = 2; k < 6; ++k) {
-    for(int i = 0; i < 8; ++i) {
+  for (int k = 2; k < 6; ++k) {
+    for (int i = 0; i < 8; ++i) {
       board_[k][i] = EMPTY;
     }
   }
 
-  for(int i = 0; i < 8; ++i) {
+  for (int i = 0; i < 8; ++i) {
     board_[6][i] = Black(PAWN);
   }
 
@@ -93,27 +93,27 @@ Board::Board() {
 void Board::Move(Movement * move) {
   // if the movement is from UCI notation, then it has just source square
   // add other data like: piece type, color, capture, castle.
-  if(move->source_file != -1 && move->source_rank != -1 &&
+  if (move->source_file != -1 && move->source_rank != -1 &&
       IsEmpty(move->piece)) {
     move->piece = board_[move->source_rank][move->source_file];
 
-    if(AreSimilarPieces(move->piece, KING) && move->source_file == 4) {
-      if(move->dest_file == 6) {
+    if (AreSimilarPieces(move->piece, KING) && move->source_file == 4) {
+      if (move->dest_file == 6) {
         move->is_short_castle = true;
       } else if (move->dest_file == 2) {
         move->is_long_castle = true;
       }
     }
 
-    if((!IsEmpty(board_[move->dest_rank][move->dest_file])) ||
+    if ((!IsEmpty(board_[move->dest_rank][move->dest_file])) ||
        ( (AreSimilarPieces(move->piece, PAWN)) &&
          (en_passant_file_ == move->dest_file) &&
          (en_passant_capture_rank_ == move->dest_rank) ) ) {
       move->is_capture = true;
     }
 
-    if(!IsEmpty(move->promoted_piece)) {
-      if(IsWhite(move->piece)) {
+    if (!IsEmpty(move->promoted_piece)) {
+      if (IsWhite(move->piece)) {
         move->promoted_piece = White(move->promoted_piece);
       } else {
         move->promoted_piece = Black(move->promoted_piece);
@@ -121,8 +121,8 @@ void Board::Move(Movement * move) {
     }
   }
 
-  if(FindPiece(move)){
-    if(move->is_short_castle) {
+  if (FindPiece(move)) {
+    if (move->is_short_castle) {
       // move king
       board_[move->source_rank][move->source_file+2] =
           board_[move->source_rank][move->source_file];
@@ -131,7 +131,7 @@ void Board::Move(Movement * move) {
       board_[move->source_rank][move->source_file+2-1] =
           board_[move->source_rank][move->source_file+3];
       board_[move->source_rank][move->source_file+3] = EMPTY;
-    } else if(move->is_long_castle) {
+    } else if (move->is_long_castle) {
       board_[move->source_rank][move->source_file-2] =
           board_[move->source_rank][move->source_file];
       board_[move->source_rank][move->source_file] = EMPTY;
@@ -140,11 +140,12 @@ void Board::Move(Movement * move) {
           board_[move->source_rank][move->source_file-4];
       board_[move->source_rank][move->source_file-4] = EMPTY;
     } else {
-      if(move->is_capture) {
-        if(AreSimilarPieces(move->piece, PAWN) &&
+      if (move->is_capture) {
+        if (AreSimilarPieces(move->piece, PAWN) &&
             (en_passant_file_ == move->dest_file) &&
             (en_passant_capture_rank_ == move->dest_rank)) {
-          // simulate moving the pawn one square back, anyway it will be overwritten below
+          // simulate moving the pawn one square back,
+          // anyway it will be overwritten below
           board_[move->dest_rank][move->dest_file] =
               board_[en_passant_rank_][en_passant_file_];
           board_[en_passant_rank_][en_passant_file_] = EMPTY;
@@ -154,10 +155,11 @@ void Board::Move(Movement * move) {
         assert(IsWhite(board_[move->source_rank][move->source_file]) ^
                IsWhite(board_[move->dest_rank][move->dest_file]));
       }
-      board_[move->dest_rank][move->dest_file] = board_[move->source_rank][move->source_file];
+      board_[move->dest_rank][move->dest_file] =
+          board_[move->source_rank][move->source_file];
       board_[move->source_rank][move->source_file] = EMPTY;
 
-      if(!IsEmpty(move->promoted_piece)) {
+      if (!IsEmpty(move->promoted_piece)) {
         board_[move->dest_rank][move->dest_file] = move->promoted_piece;
       }
     }
@@ -166,27 +168,27 @@ void Board::Move(Movement * move) {
   }
 
   // Update castle availability
-  if(AreSimilarPieces(move->piece, KING)) {
-    if(IsWhite(move->piece)) {
+  if (AreSimilarPieces(move->piece, KING)) {
+    if (IsWhite(move->piece)) {
       white_short_castle_ = false;
       white_long_castle_ = false;
     } else {
       black_short_castle_ = false;
       black_long_castle_ = false;
     }
-  } else if(AreSimilarPieces(move->piece, ROOK)) {
+  } else if (AreSimilarPieces(move->piece, ROOK)) {
     // testing just the source file is a weak test, but it is enough to
     // determine that castle has been lost. Ideally, this variables should be
     // set to false just once, but there is no side effect in setting them
     // to false multiple times.
-    if(move->source_file == 0) {
-      if(IsWhite(move->piece)) {
+    if (move->source_file == 0) {
+      if (IsWhite(move->piece)) {
         white_long_castle_ = false;
       } else {
         black_long_castle_ = false;
       }
-    } else if(move->source_file == 7) {
-      if(IsWhite(move->piece)) {
+    } else if (move->source_file == 7) {
+      if (IsWhite(move->piece)) {
         white_short_castle_ = false;
       } else {
         black_short_castle_ = false;
@@ -196,14 +198,14 @@ void Board::Move(Movement * move) {
 
   movement_ = move;
   is_white_turn_ = !is_white_turn_;
-  if(move->is_capture || AreSimilarPieces(move->piece, PAWN)) {
+  if (move->is_capture || AreSimilarPieces(move->piece, PAWN)) {
     halfmove_clock_ = 0;
   } else {
     halfmove_clock_++;
   }
 
   // store en passant candidate
-  if(AreSimilarPieces(move->piece, PAWN) &&
+  if (AreSimilarPieces(move->piece, PAWN) &&
      (abs(move->dest_rank - move->source_rank) == 2)) {
     en_passant_file_ = move->dest_file;
     en_passant_rank_ = move->dest_rank;
@@ -222,18 +224,20 @@ void Board::Move(Movement * move) {
 bool Board::FindPiece(Movement * move) {
   bool found = false;
 
-  assert((move->dest_file >= 0 && move->dest_file < 8) || move->is_short_castle || move->is_long_castle);
-  assert((move->dest_rank >= 0 && move->dest_rank < 8) || move->is_short_castle || move->is_long_castle);
+  assert((move->dest_file >= 0 && move->dest_file < 8) ||
+         move->is_short_castle || move->is_long_castle);
+  assert((move->dest_rank >= 0 && move->dest_rank < 8) ||
+         move->is_short_castle || move->is_long_castle);
 
   IsValidMap::const_iterator it = Board::is_valid_move_.find(move->piece);
   IsValidFunction valid = *(it->second);
 
-  for(auto rank = 7; rank != -1; --rank) {
-    for(auto file = 0; file != 8; ++file) {
+  for (auto rank = 7; rank != -1; --rank) {
+    for (auto file = 0; file != 8; ++file) {
       // check if piece can reach the destination square
       // if can reach square, then filter by source square in case
       // the information exists
-      if( move->piece == board_[rank][file] &&
+      if (move->piece == board_[rank][file] &&
           valid(board_, file, rank, *move) &&
           (move->source_file == -1 || file == move->source_file) &&
           (move->source_rank == -1 || rank == move->source_rank)) {
@@ -252,31 +256,31 @@ bool Board::FindPiece(Movement * move) {
   }
 
   // Piece found
-  if(!found) {
+  if (!found) {
     assert(found);
   }
   return found;
 }
 
 
-string Board::FEN() const {
+std::string Board::FEN() const {
   // board position
   int empty_spaces = 0;
   std::string fen;
-  for(auto rank = 7; rank != -1; --rank) {
-    for(auto file = 0; file != 8; ++file) {
-      if(IsEmpty(board_[rank][file])) {
+  for (auto rank = 7; rank != -1; --rank) {
+    for (auto file = 0; file != 8; ++file) {
+      if (IsEmpty(board_[rank][file])) {
         ++empty_spaces;
       } else {
-        if(empty_spaces) {
+        if (empty_spaces) {
           fen.append(std::to_string(empty_spaces));
           empty_spaces = 0;
         }
         fen.push_back(board_[rank][file]);
       }
-    } // end of a rank
+    }  // end of a rank
 
-    if(empty_spaces) {
+    if (empty_spaces) {
       fen.append(std::to_string(empty_spaces));
       empty_spaces = 0;
     }
@@ -290,29 +294,29 @@ string Board::FEN() const {
   // castling availability
   fen.append(" ");
   bool any_castle = false;
-  if(white_short_castle_) {
+  if (white_short_castle_) {
     fen.append("K");
     any_castle = true;
   }
-  if(white_long_castle_) {
+  if (white_long_castle_) {
     fen.append("Q");
     any_castle = true;
   }
-  if(black_short_castle_) {
+  if (black_short_castle_) {
     fen.append("k");
     any_castle = true;
   }
-  if(black_long_castle_) {
+  if (black_long_castle_) {
     fen.append("q");
     any_castle = true;
   }
-  if(!any_castle) {
+  if (!any_castle) {
     fen.append("-");
   }
 
   // en passant
   fen.append(" ");
-  if(en_passant_file_ != -1) {
+  if (en_passant_file_ != -1) {
     fen.append(1, GetFile(en_passant_file_));
     fen.append(1, GetRank(en_passant_capture_rank_));
   } else {
@@ -331,10 +335,10 @@ string Board::FEN() const {
 }
 
 
-void Board::AddMoves(Board * board, std::vector<Movement *> & moves) {
+void Board::AddMoves(Board * board, const std::vector<Movement *> &moves) {
   Board * current_board = board;
 
-  for(auto & move : moves) {
+  for (auto & move : moves) {
     // clone existing board, note also next, previous and
     // alternative pointer are shallowed copied
     Board * new_board = new Board(*current_board);
@@ -350,20 +354,20 @@ void Board::AddMoves(Board * board, std::vector<Movement *> & moves) {
 }
 
 
-Board * Board::CreateFromPGN(std::string pgnfile){
-  vector<Movement *> moves;
+Board * Board::CreateFromPGN(std::string pgnfile) {
+  std::vector<Movement *> moves;
   Board * board = new Board;
   PGNReader pgn;
-  pgn.GetMoves(pgnfile, moves);
+  pgn.GetMoves(pgnfile, &moves);
   AddMoves(board, moves);
   return board;
 }
 
 
 void Board::AddAlternative(Board * board, std::string alternative_str) {
-  vector<Movement *> moves;
+  std::vector<Movement *> moves;
   UCIReader reader;
-  reader.GetMoves(alternative_str, moves);
+  reader.GetMoves(alternative_str, &moves);
 
   // the root of the alternative is the parent of the current board
   // the cloned parent is just used to create the alternative branch
@@ -382,5 +386,5 @@ void Board::AddAlternative(Board * board, std::string alternative_str) {
   delete cloned_parent;
 }
 
-}
-}
+}  // namespace chess
+}  // namespace acortes

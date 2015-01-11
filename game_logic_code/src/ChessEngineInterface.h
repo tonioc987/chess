@@ -11,6 +11,7 @@
 #include <string>
 #include <utility>
 #include <atomic>
+#include <vector>
 
 namespace acortes {
 namespace chess {
@@ -19,15 +20,14 @@ class Board;
 class PGNReader;
 
 class ChessEngineInterface {
-
-public:
-  ChessEngineInterface(std::string engine_path, bool verbose = false);
+ public:
+  explicit ChessEngineInterface(std::string engine_path, bool verbose = false);
   void Initialize();
-  void FullAnalysis(Board * board, long time_per_move, long blunder_threshold);
+  void FullAnalysis(Board * board, int time_per_move, int blunder_threshold);
   ~ChessEngineInterface();
   void set_request_stop() { request_stop_ = true; }
 
-private:
+ private:
   std::string engine_path_;
   int parentToChild_[2];
   int childToParent_[2];
@@ -42,16 +42,16 @@ private:
   std::atomic<bool> request_stop_;
 
   size_t Read();
-  void ReadLines(std::vector<std::string> & lines);
+  void ReadLines(std::vector<std::string> *lines);
   std::string GetNextLine();
   void ClearLines();
   void WaitForLine(std::string line_start);
   void Write(std::string msg);
   void WriteLine(std::string msg);
-  std::pair<long, std::string> Analyze(std::string fen, long time_secs);
+  std::pair<int, std::string> Analyze(std::string fen, int time_secs);
 };
 
-}
-}
+}  // namespace chess
+}  // namespace acortes
 
 #endif

@@ -22,9 +22,10 @@ namespace chess {
 #define EMPTY '.'
 
 
-bool inline AreSimilarPieces(char piece1, char piece2) { return (toupper(piece1) == toupper(piece2)); }
+bool inline AreSimilarPieces(char piece1, char piece2) {
+  return (toupper(piece1) == toupper(piece2));
+}
 bool inline IsEmpty(char piece) { return ('.' == piece); }
-
 char inline White(char piece) { return (toupper(piece)); }
 char inline Black(char piece) { return (tolower(piece)); }
 bool inline IsWhite(char piece) { return (isupper(piece)); }

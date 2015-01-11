@@ -9,13 +9,17 @@
 #include <unistd.h>
 #include <errno.h>
 #include <cassert>
+#include <cstdint>
+#include <utility>
+#include <string>
+#include <vector>
 #include "ChessEngineInterface.h"
 #include "Board.h"
 #include "reader/UCIReader.h"
 #include "Gui.h"
 #include "Logger.h"
 
-using namespace std;
+using std::string;
 
 namespace acortes {
 namespace chess {
@@ -38,12 +42,12 @@ void ChessEngineInterface::Initialize() {
   // setup pipes between parent and child
   size_t index = engine_path_.find_last_of('/');
 
-  switch(pid_ = fork()) {
+  switch (pid_ = fork()) {
     case -1:
       // fork failed;
       exit(-1);
 
-    case 0: // child launches stockfish
+    case 0:  // child launches stockfish
       close(parentToChild_[WRITE_FD]);
       close(childToParent_[READ_FD]);
       dup2(parentToChild_[READ_FD], STDIN_FILENO);
@@ -53,8 +57,8 @@ void ChessEngineInterface::Initialize() {
       execlp(engine_path_.c_str(), engine_path_.substr(index+1).c_str(), NULL);
       exit(-1);
 
-    default: //parent
-      //cout << "Child " << pid_ << "running" << endl;
+    default:  // parent
+      // cout << "Child " << pid_ << "running" << endl;
       close(parentToChild_[READ_FD]);
       close(childToParent_[WRITE_FD]);
       break;
@@ -79,23 +83,25 @@ ChessEngineInterface::~ChessEngineInterface() {
 size_t ChessEngineInterface::Read() {
   struct timeval timeout;
   timeout.tv_sec = 0;
-  timeout.tv_usec = 1000; //1 msec
+  timeout.tv_usec = 1000;  // 1 msec
   size_t readResult = 0;
 
   // setup for non-blocking reads from child
   FD_ZERO(&readfds_);
   FD_SET(childToParent_[READ_FD], &readfds_);
 
-  switch(select(1+childToParent_[READ_FD], & readfds_, (fd_set*)NULL, (fd_set*)NULL, &timeout)) {
-    case 0: // timeout
+  switch (select(1+childToParent_[READ_FD], & readfds_,
+                 reinterpret_cast<fd_set*>(NULL),
+                 reinterpret_cast<fd_set*>(NULL), &timeout)) {
+    case 0:  // timeout
       break;
 
     case -1:
-      if(errno == EINTR || errno == EAGAIN) {
+      if (errno == EINTR || errno == EAGAIN) {
         errno = 0;
         break;
       } else {
-        //cout << "select() failed" << endl;
+        // cout << "select() failed" << endl;
         exit(-1);
       }
 
@@ -111,23 +117,23 @@ size_t ChessEngineInterface::Read() {
 }
 
 
-void ChessEngineInterface::ReadLines(vector<string> & lines) {
-  while(size_t nbytes = Read()) {
+void ChessEngineInterface::ReadLines(std::vector<string> *lines) {
+  while (size_t nbytes = Read()) {
     char * start = buffer_;
     char * current = buffer_;
     char * end_buffer = buffer_ + nbytes;
 
-    while(current < end_buffer) {
-      if(*current == '\n') {
+    while (current < end_buffer) {
+      if (*current == '\n') {
         temp_string_.append(start, current);
-        lines.push_back(temp_string_);
+        lines->push_back(temp_string_);
         LOG(temp_string_.c_str());
         temp_string_.clear();
         start = current + 1;
       }
       current++;
     }
-    temp_string_.append(start,current);
+    temp_string_.append(start, current);
   }
 }
 
@@ -135,13 +141,13 @@ void ChessEngineInterface::ReadLines(vector<string> & lines) {
 std::string ChessEngineInterface::GetNextLine() {
   std::string line = "";
 
-  if(lines_.size() == index_current_line_) {
+  if (lines_.size() == index_current_line_) {
     // if lines have been processed, try to get more from
     // the engine thread
-    ReadLines(lines_);
+    ReadLines(&lines_);
   }
 
-  if(index_current_line_ < lines_.size()) {
+  if (index_current_line_ < lines_.size()) {
     line = lines_[index_current_line_];
     index_current_line_++;
   }
@@ -159,8 +165,7 @@ void ChessEngineInterface::WaitForLine(string line_start) {
 
   do {
     line = GetNextLine();
-  } while(line.empty() || line.compare(0, line_start.size(), line_start) != 0);
-
+  } while (line.empty() || line.compare(0, line_start.size(), line_start) != 0);
 }
 
 
@@ -174,12 +179,12 @@ void ChessEngineInterface::WriteLine(string msg) {
 }
 
 
-void ChessEngineInterface::FullAnalysis(Board * board, long time_per_move, long blunder_threshold) {
-
+void ChessEngineInterface::FullAnalysis(Board * board, int time_per_move,
+    int blunder_threshold) {
   string alternative_str = "";
   request_stop_ = false;
 
-  while(board != nullptr && !request_stop_.load()) {
+  while (board != nullptr && !request_stop_.load()) {
     // IsWhiteTurn stores who is going to move next
     // true => black just moved
     //      => white to move
@@ -202,19 +207,19 @@ void ChessEngineInterface::FullAnalysis(Board * board, long time_per_move, long 
     // engine evaluations are always from its viewpoint
     // normalize them to + white advantage, - black advantage
     // just need to inverse black evaluations
-    if(!white_to_move) {
+    if (!white_to_move) {
       analysis.first *= -1;
     }
     board->centipawns = analysis.first;
-    LOG(to_string(board->centipawns).c_str());
+    LOG(std::to_string(board->centipawns).c_str());
     LOG(analysis.second.c_str());
 
-    if(board->previous) {
+    if (board->previous) {
       auto diff = board->previous->centipawns - board->centipawns;
 
-      if((!white_to_move && diff > blunder_threshold) ||
+      if ((!white_to_move && diff > blunder_threshold) ||
          (white_to_move && diff < -blunder_threshold)) {
-        LOG(to_string(diff).c_str());
+        LOG(std::to_string(diff).c_str());
         Board::AddAlternative(board, alternative_str);
         LOG(board->FEN().c_str());
         board->alternative->centipawns = board->previous->centipawns;
@@ -226,10 +231,11 @@ void ChessEngineInterface::FullAnalysis(Board * board, long time_per_move, long 
 }
 
 
-pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
+std::pair<int, string> ChessEngineInterface::Analyze(string fen,
+    int time_secs) {
   WriteLine("ucinewgame");
   WriteLine("position fen " + fen);
-  WriteLine("go movetime " + to_string(time_secs*1000));
+  WriteLine("go movetime " + std::to_string(time_secs*1000));
   WaitForLine("bestmove");
 
   auto it = lines_.rbegin();
@@ -239,15 +245,15 @@ pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
   static const string cp_pattern = " score cp ";
   static const string pv_pattern = " pv ";
 
-  for(; it != it_end; ++it) {
+  for (; it != it_end; ++it) {
     size_t index = it->find(bestmove_pattern);
-    if(index != string::npos) {
+    if (index != string::npos) {
       index += bestmove_pattern.length();
       string candidate_move = it->substr(index,
           it->find(" ", index)-index);
-      if(candidate_move.compare("(none)") == 0) {
+      if (candidate_move.compare("(none)") == 0) {
         // in case of checkmate, there is no reply
-        return make_pair(0,"");
+        return std::make_pair(0, "");
       } else {
         // move on to look for the best move
         break;
@@ -256,39 +262,39 @@ pair<long, string> ChessEngineInterface::Analyze(string fen, long time_secs) {
   }
 
   // get best line
-  for(; it != it_end; ++it) {
-    long value = 0;
+  for (; it != it_end; ++it) {
+    int value = 0;
     const string &str = *it;
     const string *pattern = &cp_pattern;
     size_t index1 = str.find(*pattern);
-    if(index1 == string::npos) {
+    if (index1 == string::npos) {
       pattern = &mate_pattern;
       index1 = str.find(*pattern);
     }
 
-    if(index1 != string::npos) {
+    if (index1 != string::npos) {
       index1 += pattern->length();
       string value_str = str.substr(index1,
           str.find(" ", index1) - index1);
-      value = atol(value_str.c_str());
-      if(pattern->compare(mate_pattern) == 0) {
+      value = atoi(value_str.c_str());
+      if (pattern->compare(mate_pattern) == 0) {
         // very high evaluation for mate
         value = (value < 0) ? -100000 : 100000;
       }
     }
 
     size_t index2 = str.find(pv_pattern);
-    if(index1 != string::npos && index2 != string::npos) {
+    if (index1 != string::npos && index2 != string::npos) {
       index2 += pv_pattern.length();
       string movements = str.substr(index2);
       ClearLines();
-      return make_pair(value, movements);
+      return std::make_pair(value, movements);
     }
   }
   assert(false);
-  return make_pair(0,"");
+  return std::make_pair(0, "");
 }
 
 
-}
-}
+}  // namespace chess
+}  // namespace acortes

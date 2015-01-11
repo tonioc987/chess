@@ -13,12 +13,13 @@ namespace acortes {
 namespace chess {
 
 class Pawn {
-public:
-  static bool IsValidMove(char (&board)[8][8], int file, int rank, Movement & move){
+ public:
+  static bool IsValidMove(const char (&board)[8][8],
+      int file, int rank, const Movement & move) {
     bool is_white = IsWhite(board[rank][file]);
-    const int rank_initial = (is_white) ? 1 : 6 ;
-    const int rank_one_step = (is_white) ? rank+1 : rank-1 ;
-    const int rank_two_steps = (is_white) ? rank+2 : rank-2 ;
+    const int rank_initial = (is_white) ? 1 : 6;
+    const int rank_one_step = (is_white) ? rank+1 : rank-1;
+    const int rank_two_steps = (is_white) ? rank+2 : rank-2;
 
     assert(move.dest_rank >= 0 && move.dest_rank < 8);
     assert(move.dest_file >= 0 && move.dest_file < 8);
@@ -40,8 +41,8 @@ public:
     // side move to capture to the left
     if (file > 0 &&
         move.dest_file == file-1 &&
-        move.dest_rank == rank_one_step/*&&
-        is there an enemy piece */) {
+        move.dest_rank == rank_one_step /* && is there an enemy piece */
+        ) {
       return true;
     }
 
@@ -59,7 +60,7 @@ public:
   }
 };
 
-}
-}
+}  // namespace chess
+}  // namespace acortes
 
 #endif

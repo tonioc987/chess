@@ -7,22 +7,24 @@
 #ifndef PGNREADER_H_
 #define PGNREADER_H_
 
+#include <string>
+#include <vector>
 #include "ChessReader.h"
 
 namespace acortes {
 namespace chess {
 
 class PGNReader : ChessReader {
-public:
-  PGNReader() {};
-  ~PGNReader() {};
-  void GetMoves(std::string filename, std::vector<Movement*> & moves);
+ public:
+  PGNReader() {}
+  ~PGNReader() {}
+  void GetMoves(std::string filename, std::vector<Movement*> *moves);
 
-protected:
+ protected:
   Movement* ParseMove(std::string move);
 };
 
-}
-}
+}  // namespace chess
+}  // namespace acortes
 
 #endif

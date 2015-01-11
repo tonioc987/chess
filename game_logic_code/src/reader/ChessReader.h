@@ -7,24 +7,25 @@
 #ifndef CHESSREADER_H_
 #define CHESSREADER_H_
 
-#include "../Common.h"
+#include <string>
 #include <vector>
+#include "../Common.h"
 
 namespace acortes {
 namespace chess {
 
 class ChessReader {
-public:
-  ChessReader() {};
-  virtual ~ChessReader() {};
-  virtual void GetMoves(std::string, std::vector<Movement*> & moves) = 0;
+ public:
+  ChessReader() {}
+  virtual ~ChessReader() {}
+  virtual void GetMoves(std::string, std::vector<Movement*> *moves) = 0;
 
-protected:
-  void ParseLine(std::string line, std::vector<Movement*> & moves);
+ protected:
+  void ParseLine(std::string line, std::vector<Movement*> *moves);
   virtual Movement* ParseMove(std::string move) = 0;
 };
 
-}
-}
+}  // namespace chess
+}  // namespace acortes
 
 #endif

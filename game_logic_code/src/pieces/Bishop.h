@@ -13,8 +13,9 @@ namespace acortes {
 namespace chess {
 
 class Bishop {
-public:
-  static bool IsValidMove(char (&board)[8][8], int file, int rank, Movement & move) {
+ public:
+  static bool IsValidMove(const char (&board)[8][8],
+      int file, int rank, const Movement & move) {
     int file_movement = abs(file - move.dest_file);
     int rank_movement = abs(rank - move.dest_rank);
 
@@ -24,10 +25,10 @@ public:
     assert(file != -1);
     assert(rank != -1);
 
-    if(file_movement == 0 && rank_movement == 0) {
+    if (file_movement == 0 && rank_movement == 0) {
       // no movement
       return false;
-    } else if(file_movement == rank_movement) {
+    } else if (file_movement == rank_movement) {
       // diagonal movement
       return true;
     }
@@ -35,7 +36,7 @@ public:
   }
 };
 
-}
-}
+}  // namespace chess
+}  // namespace acortes
 
 #endif

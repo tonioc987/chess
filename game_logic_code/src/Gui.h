@@ -8,10 +8,13 @@
 #ifndef GUI_H
 #define GUI_H
 
+#include <string>
+
 void InitNCurses();
 void EndNCurses();
 void UpdateFEN(const std::string fen);
-void UpdateBoard(acortes::chess::Board & board, const bool print_as_white);
+void UpdateBoard(const acortes::chess::Board & board,
+                 const bool print_as_white);
 void UpdateMoves(const acortes::chess::Board *const current,
                  const acortes::chess::Board *const analysis);
 

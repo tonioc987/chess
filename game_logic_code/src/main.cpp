@@ -1,16 +1,20 @@
-#include <cstdio>
-#include <cstring>
+/* Copyright 2015 Antonio Cortes
+ *
+ */
 #include <ncurses.h>
 #include <getopt.h>
+#include <cstdio>
+#include <cstring>
+#include <string>
 #include <tuple>
-#include <thread>
+#include <thread>  // NOLINT
 #include "Board.h"
 #include "ChessEngineInterface.h"
 #include "Gui.h"
 #include "Logger.h"
 
-using namespace std;
-using namespace acortes::chess;
+using std::string;
+using acortes::chess::Log;
 
 struct ConfigParams {
   string engine;
@@ -25,12 +29,23 @@ void ParseArguments(int argc, char* argv[], ConfigParams *params);
 string PrintUsage();
 
 int main(int argc, char* argv[]) {
-	InitNCurses();
+  InitNCurses();
   GameAnalysis(argc, argv);
   EndNCurses();
 }
 
+void DestroyBoard(acortes::chess::Board *board) {
+  acortes::chess::Board *next;
+  while (board) {
+    next = board->next;
+    delete board;
+    board = next;
+  }
+}
+
 int GameAnalysis(int argc, char* argv[]) {
+  using acortes::chess::Board;
+  using acortes::chess::ChessEngineInterface;
   int tmp = ' ';
   bool print_as_white = true;
   ConfigParams params;
@@ -38,40 +53,35 @@ int GameAnalysis(int argc, char* argv[]) {
   ParseArguments(argc, argv, &params);
 
   Board * initial_board = Board::CreateFromPGN(params.pgn_file);
-  ChessEngineInterface engine(params.engine, false);
+  acortes::chess::ChessEngineInterface engine(params.engine, false);
   // no need to analyze first board, default centipawns = 0 is OK
-  thread analysis{&ChessEngineInterface::FullAnalysis, &engine,
+  std::thread analysis{&ChessEngineInterface::FullAnalysis, &engine,
     initial_board->next, params.time_per_move, params.blunder_threshold};
 
-  Board * board = initial_board;
-  while(tmp != 'x') {
+  acortes::chess::Board * board = initial_board;
+  while (tmp != 'x') {
     UpdateMoves(board, nullptr);
     UpdateBoard(*board, print_as_white);
     UpdateFEN(board->FEN());
     tmp = getch();
-    if(tmp == KEY_UP && board->previous) {
+    if (tmp == KEY_UP && board->previous) {
       board = board->previous;
-    }
-    else if(tmp == KEY_DOWN && board->next) {
+    } else if (tmp == KEY_DOWN && board->next) {
       board = board->next;
-    }
-    else if(tmp == KEY_RIGHT && board->alternative) {
+    } else if (tmp == KEY_RIGHT && board->alternative) {
       board = board->alternative;
-    }
-    else if(tmp == KEY_LEFT && board->original) {
+    } else if (tmp == KEY_LEFT && board->original) {
       board = board->original;
-    }
-    else if(tmp == KEY_PPAGE) {
+    } else if (tmp == KEY_PPAGE) {
       // find start of alternative or start of game
-      while(board->previous) {
-        if(board->original) {
+      while (board->previous) {
+        if (board->original) {
           board = board->original;
           break;
         }
         board = board->previous;
       }
-    }
-    else if(tmp == 'f') {
+    } else if (tmp == 'f') {
       // flip board
       print_as_white = !print_as_white;
     }
@@ -79,6 +89,7 @@ int GameAnalysis(int argc, char* argv[]) {
 
   engine.set_request_stop();
   analysis.join();
+  DestroyBoard(initial_board);
   return 0;
 }
 
@@ -89,15 +100,16 @@ void ReadConfigFile(ConfigParams *config) {
   int items;
 
   file_ptr = fopen(".config", "r");
-  if(file_ptr) {
+  if (file_ptr) {
     items = fscanf(file_ptr, "%s %s", key, value);
-    while(items == 2) {
-      LOG(key); LOG(value);
-      if(strcmp(key,"engine") == 0) {
+    while (items == 2) {
+      LOG(key);
+      LOG(value);
+      if (strcmp(key, "engine") == 0) {
         config->engine = string(value);
-      } else if(strcmp(key, "time_per_move") == 0) {
+      } else if (strcmp(key, "time_per_move") == 0) {
         config->time_per_move = atol(value);
-      } else if(strcmp(key, "blunder_threshold") == 0) {
+      } else if (strcmp(key, "blunder_threshold") == 0) {
         config->blunder_threshold = atol(value);
       }
       items = fscanf(file_ptr, "%s %s", key, value);
@@ -107,21 +119,18 @@ void ReadConfigFile(ConfigParams *config) {
 }
 
 void ParseArguments(int argc, char * argv[], ConfigParams *params) {
-
   static struct option long_options[] = {
-      {"engine", required_argument, 0,'e'},
-      {"pgnfile", required_argument, 0,'f'},
+      {"engine", required_argument, 0, 'e'},
+      {"pgnfile", required_argument, 0, 'f'},
       {"time_per_move", required_argument, 0, 't'},
-      {"blunder_threshold", required_argument,0,'b'}
+      {"blunder_threshold", required_argument, 0, 'b'}
   };
-
-  int opt=0;
+  int opt = 0;
   int long_index = 0;
 
-  while((opt = getopt_long(argc, argv, "e:f:t:b:a:",
+  while ((opt = getopt_long(argc, argv, "e:f:t:b:a:",
           long_options, &long_index)) != -1) {
-    switch(opt) {
-
+    switch (opt) {
       case 'e': {
         params->engine = string(optarg);
         break;
@@ -149,7 +158,7 @@ void ParseArguments(int argc, char * argv[], ConfigParams *params) {
     }
   }
 
-  if(params->engine.compare("") == 0 || params->pgn_file.compare("") == 0) {
+  if (params->engine.compare("") == 0 || params->pgn_file.compare("") == 0) {
     PrintUsage();
     exit(EXIT_FAILURE);
   }

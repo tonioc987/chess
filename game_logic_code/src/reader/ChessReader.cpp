@@ -5,22 +5,21 @@
  *  See LICENSE file in the root of this project
  */
 
-
 #include "ChessReader.h"
-
-using namespace std;
+#include <vector>
+#include <string>
 
 namespace acortes {
 namespace chess {
 
-void ChessReader::ParseLine(std::string line, std::vector<Movement*> & moves) {
+void ChessReader::ParseLine(std::string line, std::vector<Movement*> *moves) {
   std::string move;
 
   // not very robust assuming each line contains complete moves.
-  for(unsigned int i = 0; i < line.size(); ++i) {
+  for (unsigned int i = 0; i < line.size(); ++i) {
     // A move always start with a letter, so just skip
     // spaces, move number and the dot
-    while(i < line.size() &&
+    while (i < line.size() &&
            (isdigit(line[i]) ||
             isspace(line[i]) ||
             line[i] == '.' ||
@@ -29,13 +28,16 @@ void ChessReader::ParseLine(std::string line, std::vector<Movement*> & moves) {
       i++;
     }
 
-    if(i >= line.size()) break;
+    if (i >= line.size()) break;
 
     move.clear();
-    while(i < line.size() && !isspace(line[i])) { move += line[i]; i++; }
-    moves.push_back(ParseMove(move));
+    while (i < line.size() && !isspace(line[i])) {
+      move += line[i];
+      i++;
+    }
+    moves->push_back(ParseMove(move));
   }
 }
 
-}
-}
+}  // namespace chess
+}  // namespace acortes

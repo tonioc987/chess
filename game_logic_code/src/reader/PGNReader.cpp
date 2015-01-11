@@ -7,32 +7,32 @@
 
 #include <fstream>
 #include <cassert>
+#include <string>
+#include <vector>
 #include "PGNReader.h"
-
-using namespace std;
 
 namespace acortes {
 namespace chess {
 
-void PGNReader::GetMoves(string filename, vector<Movement*> & moves) {
-  ifstream pgn_file(filename);
-  string line;
-  string move;
+void PGNReader::GetMoves(std::string filename, std::vector<Movement*> *moves) {
+  std::ifstream pgn_file(filename);
+  std::string line;
+  std::string move;
 
-  if(pgn_file.is_open()) {
-    while(std::getline(pgn_file, line)) {
+  if (pgn_file.is_open()) {
+    while (std::getline(pgn_file, line)) {
       // for now ignore all the information about the game
-      if(line.size() > 0 && line[0] != '[') {
+      if (line.size() > 0 && line[0] != '[') {
         ParseLine(line, moves);
       }
     }
   }
 
   bool isWhite = true;
-  for(auto & movement : moves) {
-    if(!isWhite) {
+  for (auto & movement : *moves) {
+    if (!isWhite) {
       movement->piece = Black(movement->piece);
-      if(!IsEmpty(movement->promoted_piece)) {
+      if (!IsEmpty(movement->promoted_piece)) {
         movement->promoted_piece = Black(movement->promoted_piece);
       }
     }
@@ -50,7 +50,7 @@ Movement * PGNReader::ParseMove(std::string move) {
   m->move = move;
 
   // process castles first
-  if(move.compare("O-O") == 0) {
+  if (move.compare("O-O") == 0) {
     m->is_short_castle = true;
     m->piece = KING;
     return m;
@@ -64,16 +64,16 @@ Movement * PGNReader::ParseMove(std::string move) {
   // process the destination square.
 
   // 1st process checks or check mate
-  if(move[i] == '+') {
+  if (move[i] == '+') {
     m->is_check = true;
     i--;
-  } else if(move[i] == '#') {
+  } else if (move[i] == '#') {
     m->is_mate = true;
     i--;
   }
 
   // process promotion e.g. e8=Q
-  switch(move[i]) {
+  switch (move[i]) {
     case 'R':
     case 'B':
     case 'N':
@@ -96,19 +96,19 @@ Movement * PGNReader::ParseMove(std::string move) {
 
   // if it is a simple pawn movement, this entry will be used later
   // otherwise continue processing the string
-  if(i > 0) {
+  if (i > 0) {
     i--;
   }
 
   // 4th capture
-  if(move[i] == 'x') {
+  if (move[i] == 'x') {
     m->is_capture = true;
     i--;
   }
 
   // 5th optional disambiguation, in some sense, pawns always have
   // disambiguation file
-  switch(move[i]) {
+  switch (move[i]) {
     case 'a':
     case 'b':
     case 'c':
@@ -118,8 +118,8 @@ Movement * PGNReader::ParseMove(std::string move) {
     case 'g':
     case 'h': {
       m->source_file = GetFile(move[i]);
-      if(i > 0) {
-        i--; // for pawns still this entry will be used later
+      if (i > 0) {
+        i--;  // for pawns still this entry will be used later
       }
       break;
     }
@@ -133,14 +133,14 @@ Movement * PGNReader::ParseMove(std::string move) {
     case '7':
     case '8': {
       m->source_rank = GetRank(move[i]);
-      i--; // not still sure if pawn protection needed as in previous case
+      i--;  // not still sure if pawn protection needed as in previous case
       break;
     }
   }
 
   // 6th piece type
-  assert(i==0);
-  switch(move[i]) {
+  assert(i == 0);
+  switch (move[i]) {
     case 'R':
     case 'B':
     case 'N':
@@ -167,12 +167,12 @@ Movement * PGNReader::ParseMove(std::string move) {
     }
   }
 
-  // TODO
-  //m->is_enpassant = false;
-  //m->is_promotion = false;
+  // TODO(acortes):
+  // m->is_enpassant = false;
+  // m->is_promotion = false;
 
   return m;
 }
 
-}
-}
+}  // namespace chess
+}  // namespace acortes

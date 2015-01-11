@@ -8,6 +8,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include <string>
 #include <map>
 #include <vector>
 #include "Common.h"
@@ -15,11 +16,12 @@
 namespace acortes {
 namespace chess {
 
-typedef  bool (*IsValidFunction)(char (&board)[8][8], int file, int rank, Movement & movement);
+typedef  bool (*IsValidFunction)(const char (&board)[8][8],
+    int file, int rank, const Movement &movement);
 typedef std::map<char, IsValidFunction> IsValidMap;
 
 class Board {
-public:
+ public:
   Board();
   std::string FEN() const;
   void Move(Movement * move);
@@ -27,13 +29,14 @@ public:
   std::string GetMove() const { return movement_->move; }
   Movement * GetMovement() const { return movement_; }
   char* operator[](size_t idx) { return board_[idx]; }
+  const char *const operator[](size_t idx) const { return board_[idx]; }
   int move_number() const { return move_number_; }
 
-  static void AddMoves(Board * board, std::vector<Movement *> & moves);
+  static void AddMoves(Board * board, const std::vector<Movement *> &moves);
   static Board * CreateFromPGN(std::string pgnfile);
   static void AddAlternative(Board * board, std::string alternative_str);
 
-private:
+ private:
   char board_[8][8];
   Movement * movement_;
   bool is_white_turn_;
@@ -51,15 +54,15 @@ private:
 
   static const  IsValidMap is_valid_move_;
 
-public:
-  long centipawns;
+ public:
+  int centipawns;
   Board * next;
   Board * previous;
   Board * alternative;
   Board * original;
 };
 
-}
-}
+}  // namespace chess
+}  // namespace acortes
 
 #endif

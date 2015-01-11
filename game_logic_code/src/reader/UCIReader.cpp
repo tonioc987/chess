@@ -7,15 +7,15 @@
 
 #include <fstream>
 #include <cassert>
+#include <string>
+#include <vector>
 #include "UCIReader.h"
-
-using namespace std;
 
 namespace acortes {
 namespace chess {
 
 
-Movement * UCIReader::ParseMove(string move) {
+Movement * UCIReader::ParseMove(std::string move) {
   // right now support just simple movements
   assert(move.size() == 4 || move.size() == 5);
   assert(move[0] >= 'a' && move[0] <= 'h');
@@ -37,16 +37,17 @@ Movement * UCIReader::ParseMove(string move) {
   m->dest_rank = GetRank(move[i]);
   i++;
 
-  if(move.size() == 5) {
+  if (move.size() == 5) {
     m->promoted_piece = move[i];
   }
 
   return m;
 }
 
-void UCIReader::GetMoves(string moves_str, vector<Movement*> & moves) {
+void UCIReader::GetMoves(std::string moves_str,
+    std::vector<Movement*> *moves) {
   ParseLine(moves_str, moves);
 }
 
-}
-}
+}  // namespace chess
+}  // namespace acortes

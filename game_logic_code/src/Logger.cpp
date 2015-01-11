@@ -1,17 +1,18 @@
+/* Copyright 2015 Antonio Cortes
+ *
+ */
 #include "Logger.h"
-#include <mutex>
+#include <mutex>  // NOLINT
 #include <fstream>
-
-using namespace std;
 
 namespace acortes {
 namespace chess {
 
 class Logger {
-private:
-  ofstream log;
-  mutex mutex_logger;
-public:
+ private:
+  std::ofstream log;
+  std::mutex mutex_logger;
+ public:
   Logger() {
     log.open("log.txt");
   }
@@ -21,8 +22,8 @@ public:
   }
 
   void Log(const char *file, int line, const char *message) {
-    lock_guard<mutex> guard{mutex_logger};
-    log << file << ":" << line << ":" << message << endl;
+    std::lock_guard<std::mutex> guard{mutex_logger};
+    log << file << ":" << line << ":" << message << std::endl;
   }
 };
 
@@ -32,5 +33,5 @@ void Log(const char *file, int line, const char *message) {
   logger.Log(file, line, message);
 }
 
-}
-}
+}  // namespace chess
+}  // namespace acortes
