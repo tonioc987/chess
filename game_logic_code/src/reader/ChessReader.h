@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "../Common.h"
 
 namespace acortes {
@@ -18,11 +19,11 @@ class ChessReader {
  public:
   ChessReader() {}
   virtual ~ChessReader() {}
-  virtual void GetMoves(std::string, std::vector<Movement*> *moves) = 0;
+  virtual void GetMoves(std::string, std::vector<std::unique_ptr<Movement>> *moves) = 0;
 
  protected:
-  void ParseLine(std::string line, std::vector<Movement*> *moves);
-  virtual Movement* ParseMove(std::string move) = 0;
+  void ParseLine(std::string line, std::vector<std::unique_ptr<Movement>> *moves);
+  virtual std::unique_ptr<Movement> ParseMove(std::string move) = 0;
 };
 
 }  // namespace chess

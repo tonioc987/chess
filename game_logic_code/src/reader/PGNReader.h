@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "ChessReader.h"
 
 namespace acortes {
@@ -18,10 +19,10 @@ class PGNReader : ChessReader {
  public:
   PGNReader() {}
   ~PGNReader() {}
-  void GetMoves(std::string filename, std::vector<Movement*> *moves);
+  void GetMoves(std::string filename, std::vector<std::unique_ptr<Movement>> *moves);
 
  protected:
-  Movement* ParseMove(std::string move);
+  std::unique_ptr<Movement> ParseMove(std::string move);
 };
 
 }  // namespace chess

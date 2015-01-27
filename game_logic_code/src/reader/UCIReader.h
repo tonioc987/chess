@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "ChessReader.h"
 
 namespace acortes {
@@ -18,10 +19,10 @@ class UCIReader : ChessReader {
  public:
   UCIReader() {}
   ~UCIReader() {}
-  void GetMoves(std::string moves_str, std::vector<Movement*> *moves);
+  void GetMoves(std::string moves_str, std::vector<std::unique_ptr<Movement>> *moves);
 
  protected:
-  Movement* ParseMove(std::string move);
+  std::unique_ptr<Movement> ParseMove(std::string move);
 };
 
 }  // namespace chess

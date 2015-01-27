@@ -9,20 +9,21 @@
 #include <cassert>
 #include <string>
 #include <vector>
+#include <memory>
 #include "UCIReader.h"
 
 namespace acortes {
 namespace chess {
 
 
-Movement * UCIReader::ParseMove(std::string move) {
+std::unique_ptr<Movement> UCIReader::ParseMove(std::string move) {
   // right now support just simple movements
   assert(move.size() == 4 || move.size() == 5);
   assert(move[0] >= 'a' && move[0] <= 'h');
   assert(move[1] >= '1' && move[1] <= '8');
   assert(move[2] >= 'a' && move[2] <= 'h');
   assert(move[3] >= '1' && move[3] <= '8');
-  Movement * m = new Movement;
+  std::unique_ptr<Movement> m(new Movement);
   int i = 0;
 
   m->move = move;
@@ -45,7 +46,7 @@ Movement * UCIReader::ParseMove(std::string move) {
 }
 
 void UCIReader::GetMoves(std::string moves_str,
-    std::vector<Movement*> *moves) {
+    std::vector<std::unique_ptr<Movement>> *moves) {
   ParseLine(moves_str, moves);
 }
 

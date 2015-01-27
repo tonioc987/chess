@@ -9,8 +9,10 @@
 #define BOARD_H
 
 #include <string>
+#include <memory>
 #include <map>
 #include <vector>
+#include <memory>
 #include "Common.h"
 
 namespace acortes {
@@ -23,22 +25,23 @@ typedef std::map<char, IsValidFunction> IsValidMap;
 class Board {
  public:
   Board();
+  Board(const Board &board);
   std::string FEN() const;
-  void Move(Movement * move);
+  void Move(std::unique_ptr<Movement> move);
   bool IsWhiteTurn() const { return is_white_turn_; }
   std::string GetMove() const { return movement_->move; }
-  Movement * GetMovement() const { return movement_; }
+  //Movement * GetMovement() const { return movement_; }
   char* operator[](size_t idx) { return board_[idx]; }
   const char *const operator[](size_t idx) const { return board_[idx]; }
   int move_number() const { return move_number_; }
 
-  static void AddMoves(Board * board, const std::vector<Movement *> &moves);
-  static Board * CreateFromPGN(std::string pgnfile);
+  static void AddMoves(Board * board, std::vector<std::unique_ptr<Movement>> *moves);
+  static std::unique_ptr<Board> CreateFromPGN(std::string pgnfile);
   static void AddAlternative(Board * board, std::string alternative_str);
 
  private:
   char board_[8][8];
-  Movement * movement_;
+  std::unique_ptr<Movement> movement_;
   bool is_white_turn_;
   int move_number_;
   int halfmove_clock_;
@@ -56,9 +59,9 @@ class Board {
 
  public:
   int centipawns;
-  Board * next;
+  std::unique_ptr<Board> next;
   Board * previous;
-  Board * alternative;
+  std::unique_ptr<Board> alternative;
   Board * original;
 };
 

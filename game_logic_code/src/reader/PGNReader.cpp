@@ -14,7 +14,7 @@
 namespace acortes {
 namespace chess {
 
-void PGNReader::GetMoves(std::string filename, std::vector<Movement*> *moves) {
+void PGNReader::GetMoves(std::string filename, std::vector<std::unique_ptr<Movement>> *moves) {
   std::ifstream pgn_file(filename);
   std::string line;
   std::string move;
@@ -43,8 +43,8 @@ void PGNReader::GetMoves(std::string filename, std::vector<Movement*> *moves) {
 }
 
 
-Movement * PGNReader::ParseMove(std::string move) {
-  Movement * m = new Movement;
+std::unique_ptr<Movement> PGNReader::ParseMove(std::string move) {
+  std::unique_ptr<Movement> m(new Movement);
   int i = move.size() - 1;
 
   m->move = move;

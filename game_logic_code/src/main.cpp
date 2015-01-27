@@ -34,14 +34,6 @@ int main(int argc, char* argv[]) {
   EndNCurses();
 }
 
-void DestroyBoard(acortes::chess::Board *board) {
-  acortes::chess::Board *next;
-  while (board) {
-    next = board->next;
-    delete board;
-    board = next;
-  }
-}
 
 int GameAnalysis(int argc, char* argv[]) {
   using acortes::chess::Board;
@@ -52,13 +44,13 @@ int GameAnalysis(int argc, char* argv[]) {
   ReadConfigFile(&params);
   ParseArguments(argc, argv, &params);
 
-  Board * initial_board = Board::CreateFromPGN(params.pgn_file);
+  std::unique_ptr<Board> initial_board = Board::CreateFromPGN(params.pgn_file);
   acortes::chess::ChessEngineInterface engine(params.engine, false);
   // no need to analyze first board, default centipawns = 0 is OK
   std::thread analysis{&ChessEngineInterface::FullAnalysis, &engine,
-    initial_board->next, params.time_per_move, params.blunder_threshold};
+    initial_board->next.get(), params.time_per_move, params.blunder_threshold};
 
-  acortes::chess::Board * board = initial_board;
+  Board * board = initial_board.get();
   while (tmp != 'x') {
     UpdateMoves(board, nullptr);
     UpdateBoard(*board, print_as_white);
@@ -67,9 +59,9 @@ int GameAnalysis(int argc, char* argv[]) {
     if (tmp == KEY_UP && board->previous) {
       board = board->previous;
     } else if (tmp == KEY_DOWN && board->next) {
-      board = board->next;
+      board = board->next.get();
     } else if (tmp == KEY_RIGHT && board->alternative) {
-      board = board->alternative;
+      board = board->alternative.get();
     } else if (tmp == KEY_LEFT && board->original) {
       board = board->original;
     } else if (tmp == KEY_PPAGE) {
@@ -89,7 +81,6 @@ int GameAnalysis(int argc, char* argv[]) {
 
   engine.set_request_stop();
   analysis.join();
-  DestroyBoard(initial_board);
   return 0;
 }
 

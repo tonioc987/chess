@@ -184,6 +184,7 @@ void ChessEngineInterface::FullAnalysis(Board * board, int time_per_move,
   string alternative_str = "";
   request_stop_ = false;
 
+  LOG(">>>>>>>> Start analysis <<<<<<<<<<");
   while (board != nullptr && !request_stop_.load()) {
     // IsWhiteTurn stores who is going to move next
     // true => black just moved
@@ -225,9 +226,10 @@ void ChessEngineInterface::FullAnalysis(Board * board, int time_per_move,
         board->alternative->centipawns = board->previous->centipawns;
       }
     }
-    board = board->next;
+    board = board->next.get();
     alternative_str = analysis.second;
   }
+  LOG(">>>>>>>> End analysis <<<<<<<<<<");
 }
 
 

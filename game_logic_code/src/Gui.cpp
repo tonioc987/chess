@@ -185,7 +185,7 @@ class MovesWindow : public NCursesWindow {
 
     if (!temp_board->previous) {
       // head board is an empty move, just skip it
-      temp_board = temp_board->next;
+      temp_board = temp_board->next.get();
     }
 
     i = 0;
@@ -206,17 +206,17 @@ class MovesWindow : public NCursesWindow {
         mvwprintw(window_, i, 20, "%d", temp->centipawns);
       }
       if (temp_board->alternative) {
-        auto alt = temp_board->alternative;
+        auto alt = temp_board->alternative.get();
         mvwprintw(window_, i, 15, "%s", alt->GetMove().c_str());
         mvwprintw(window_, i, 20, "%d", alt->centipawns);
       }
       if (temp_board == board_) wattroff(window_, A_STANDOUT);
       if (temp_board == analysis_) wattroff(window_, A_BOLD);
 
-      temp_board = temp_board->next;
+      temp_board = temp_board->next.get();
       if (temp_board && temp_board->alternative &&
-          temp_board->alternative == alt_board) {
-        temp_board = temp_board->alternative;
+          temp_board->alternative.get() == alt_board) {
+        temp_board = temp_board->alternative.get();
       }
       i++;
     }

@@ -8,11 +8,12 @@
 #include "ChessReader.h"
 #include <vector>
 #include <string>
+#include <memory>
 
 namespace acortes {
 namespace chess {
 
-void ChessReader::ParseLine(std::string line, std::vector<Movement*> *moves) {
+void ChessReader::ParseLine(std::string line, std::vector<std::unique_ptr<Movement>> *moves) {
   std::string move;
 
   // not very robust assuming each line contains complete moves.

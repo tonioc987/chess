@@ -70,7 +70,7 @@ Board::Board() {
   board_[7][6] = Black(KNIGHT);
   board_[7][7] = Black(ROOK);
 
-  movement_ = new Movement;
+  movement_.reset(new Movement);
   is_white_turn_ = true;
   move_number_ = 0;
   halfmove_clock_ = 0;
@@ -90,7 +90,34 @@ Board::Board() {
 }
 
 
-void Board::Move(Movement * move) {
+Board::Board(const Board &board) {
+  for (int k = 0; k < 8; ++k) {
+    for (int i = 0; i < 8; ++i) {
+      board_[k][i] = board[k][i];
+    }
+  }
+
+  movement_.reset(nullptr);
+  is_white_turn_ = board.is_white_turn_;
+  move_number_ = board.move_number_;
+  halfmove_clock_ = board.halfmove_clock_;
+  en_passant_file_ = board.en_passant_file_;
+  en_passant_rank_ = board.en_passant_rank_;
+  en_passant_capture_rank_ = board.en_passant_capture_rank_;
+  white_short_castle_ = board.white_short_castle_;
+  white_long_castle_ = board.white_long_castle_;
+  black_short_castle_ = board.black_short_castle_;
+  black_long_castle_ = board.black_long_castle_;
+
+  centipawns = 0;
+  next = nullptr;
+  previous = nullptr;
+  alternative = nullptr;
+  original = nullptr;
+}
+
+
+void Board::Move(std::unique_ptr<Movement> move) {
   // if the movement is from UCI notation, then it has just source square
   // add other data like: piece type, color, capture, castle.
   if (move->source_file != -1 && move->source_rank != -1 &&
@@ -121,7 +148,7 @@ void Board::Move(Movement * move) {
     }
   }
 
-  if (FindPiece(move)) {
+  if (FindPiece(move.get())) {
     if (move->is_short_castle) {
       // move king
       board_[move->source_rank][move->source_file+2] =
@@ -196,7 +223,6 @@ void Board::Move(Movement * move) {
     }
   }
 
-  movement_ = move;
   is_white_turn_ = !is_white_turn_;
   if (move->is_capture || AreSimilarPieces(move->piece, PAWN)) {
     halfmove_clock_ = 0;
@@ -218,6 +244,7 @@ void Board::Move(Movement * move) {
   }
 
   move_number_++;
+  movement_ = std::move(move);
 }
 
 
@@ -335,37 +362,33 @@ std::string Board::FEN() const {
 }
 
 
-void Board::AddMoves(Board * board, const std::vector<Movement *> &moves) {
+void Board::AddMoves(Board * board, std::vector<std::unique_ptr<Movement>> *moves) {
   Board * current_board = board;
 
-  for (auto & move : moves) {
+  for (auto & movement : *moves) {
     // clone existing board, note also next, previous and
     // alternative pointer are shallowed copied
-    Board * new_board = new Board(*current_board);
-    new_board->Move(move);
-    current_board->next = new_board;
+    std::unique_ptr<Board> new_board(new Board(*current_board));
+    new_board->Move(std::move(movement));
     new_board->previous = current_board;
-    new_board->next = nullptr;
-    new_board->alternative = nullptr;
-    new_board->original = nullptr;
-    new_board->centipawns = 0;
-    current_board = current_board->next;
+    current_board->next = std::move(new_board);
+    current_board = current_board->next.get();
   }
 }
 
 
-Board * Board::CreateFromPGN(std::string pgnfile) {
-  std::vector<Movement *> moves;
-  Board * board = new Board;
+std::unique_ptr<Board> Board::CreateFromPGN(std::string pgnfile) {
+  std::vector<std::unique_ptr<Movement>> moves;
+  std::unique_ptr<Board> board(new Board);
   PGNReader pgn;
   pgn.GetMoves(pgnfile, &moves);
-  AddMoves(board, moves);
+  AddMoves(board.get(), &moves);
   return board;
 }
 
 
 void Board::AddAlternative(Board * board, std::string alternative_str) {
-  std::vector<Movement *> moves;
+  std::vector<std::unique_ptr<Movement>> moves;
   UCIReader reader;
   reader.GetMoves(alternative_str, &moves);
 
@@ -378,11 +401,11 @@ void Board::AddAlternative(Board * board, std::string alternative_str) {
   // Add moves to cloned parent and then merge the alternative
   // with the original parent
   // assume there is at least one movement in the alternative
-  AddMoves(cloned_parent, moves);
-  Board * alternative = cloned_parent->next;
+  AddMoves(cloned_parent, &moves);
+  std::unique_ptr<Board> alternative = std::move(cloned_parent->next);
   alternative->original = board;
   alternative->previous = board->previous;
-  board->alternative = alternative;
+  board->alternative = std::move(alternative);
   delete cloned_parent;
 }
 
