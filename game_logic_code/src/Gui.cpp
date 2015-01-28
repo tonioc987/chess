@@ -47,6 +47,10 @@ class NCursesWindow {
     window_ = newwin(height, width, starty, startx);
   }
 
+  virtual ~NCursesWindow() {
+    delwin(window_);
+  }
+
  protected:
   int height_, width_, starty_, startx_;
   WINDOW *window_;
